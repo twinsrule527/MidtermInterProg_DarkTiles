@@ -68,6 +68,37 @@ public class PlayerControl : MonoBehaviour
         if(usedItem.Usable()) {
             Inventory.Pop();
             usedItem.Use();
+            actions -= USEACTIONS;
         }
+    }
+
+    //Function that allows the player to move in the direction they choose
+    private void Move(Vector2Int direction) {
+        //Gets the position you're trying to move to, to see if anything would stop you
+        Vector2Int moveToPos = new Vector2Int(Mathf.FloorToInt(transform.position.x), Mathf.FloorToInt(transform.position.y)) + direction;
+        int moveCost = 0;
+        if(CanMoveTo(myTileManager.TileDictionary[moveToPos], out moveCost)) {
+            //If you're able to move to the given position, you do move
+            transform.position += new Vector3(direction.x, direction.y, 0f);
+        }
+    }
+
+    //This bool function checks to see if the given tile is one that it is legal to move to
+    private bool CanMoveTo(TileTraits posTile, out int cost) {
+        //Three possible options:
+        //1: Too high a darkness level, can't move there
+        if(posTile.darkLevel == TileManager.MAXDARKLEVEL) {
+            cost = 0;
+            return false;
+        }
+        //2: A briar patch, takes 2 movement (or all the player's movement if they only have 1 movement left)
+            //Also, only occurs if the player is not carrying a hatchet
+        else if(posTile.placedItem.Type == ItemType.Briar && Inventory.Peek().Type != ItemType.Axe) {
+            cost = MOVEACTIONS * 2;
+            return true;
+        }
+        //3: No underlying conditions, cost is normal move cost
+        cost = MOVEACTIONS;
+        return true;
     }
 }

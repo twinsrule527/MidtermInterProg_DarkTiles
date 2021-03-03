@@ -16,6 +16,7 @@ public struct TileTraits {//This Struct is a way to have attributes and function
 //TODO: Make Singleton?
 public class TileManager : MonoBehaviour
 {
+    public const int MAXDARKLEVEL = 15;//How high the darkness level can reach for a tile
     [SerializeField]
     private List<TileBase> DarknessLevelTile;//A list of Tiles of different darkness level, from 1-15 - Is serialized in the Inspector
     [SerializeField]

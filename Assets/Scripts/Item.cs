@@ -7,7 +7,8 @@ public enum ItemType {
     Skull,
     Berry,
     Axe,
-    Oil
+    Oil,
+    Briar
 }
 public class Item : MonoBehaviour
 {
