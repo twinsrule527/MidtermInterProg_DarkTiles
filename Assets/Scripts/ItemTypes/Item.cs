@@ -5,12 +5,14 @@ using UnityEngine;
 
 //In addition to the Item class, each Item has an enum Type to make it easier to reference
 public enum ItemType {
+    
+    
+    Briar,
+    Oil,
     Candle,
-    Skull,
     Berry,
     Axe,
-    Oil,
-    Briar
+    Skull
 }
 public class Item : MonoBehaviour
 {
