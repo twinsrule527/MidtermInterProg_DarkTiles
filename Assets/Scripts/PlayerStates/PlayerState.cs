@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 //A base for the Player State Machine - Based off of the BlobState from Homework 4: BadProj
-public abstract class PlayerState : MonoBehaviour
+public abstract class PlayerState
 {
     protected PlayerControl myPlayer;
     public virtual void Enter() {

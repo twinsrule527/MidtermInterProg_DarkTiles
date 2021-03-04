@@ -28,14 +28,15 @@ public class PlayerControl : MonoBehaviour
     public readonly int DROPACTIONS = 1;
     public readonly int USEACTIONS = 2;
     public readonly int MOVEACTIONS = 1;
+    public readonly float TIMEFORACTION = 0.5f;//How long any given action takes to perform - same for everything
 
     //A set of possible states the player can be in
-    private PlayerState stateMoving;
-    private PlayerState stateTakeAction;
-    private PlayerState stateUsing;
-    private PlayerState stateDropping;
-    private PlayerState statePickingUp;
-    private PlayerState statePassTurn;
+    public PlayerState stateMoving;
+    public PlayerState stateTakeAction;
+    public PlayerState stateUsing;
+    public PlayerState stateDropping;
+    public PlayerState statePickingUp;
+    public PlayerState statePassTurn;
 
     private PlayerState _currentState;//Whatever state the player is currently in - backup variable
     public PlayerState CurrentState {//For encapsulation, has a public property for its state - only can be gotten, will only be changed via ChangeState() script
@@ -112,6 +113,8 @@ public class PlayerControl : MonoBehaviour
         }
     }
 
+
+    public Vector3 movementVector;//Used as a placeholder, which is called by the PlayerStateMoving when you move into its state
     //Function that allows the player to move in the direction they choose
     public void Move(Vector2Int direction) {
         //Gets the position you're trying to move to, to see if anything would stop you
@@ -119,7 +122,11 @@ public class PlayerControl : MonoBehaviour
         int moveCost = 0;
         if(CanMoveTo(myTileManager.TileDictionary[moveToPos], out moveCost)) {
             //If you're able to move to the given position, you do move
-            transform.position += new Vector3(direction.x, direction.y, 0f);
+            movementVector = new Vector3(direction.x, direction.y, 0f);
+            //Lose actions equal to the movecost, but clamped at 0
+            _actions = Mathf.Clamp(_actions -= moveCost, 0, maxActions);
+            //Change states to the movement state
+            ChangeState(stateMoving);
         }
     }
 
@@ -133,9 +140,11 @@ public class PlayerControl : MonoBehaviour
         }
         //2: A briar patch, takes 2 movement (or all the player's movement if they only have 1 movement left)
             //Also, only occurs if the player is not carrying a hatchet
-        else if(posTile.placedItem.Type == ItemType.Briar && Inventory.Peek().Type != ItemType.Axe) {
-            cost = MOVEACTIONS * 2;
-            return true;
+        else if(posTile.placedItem != null) {
+            if(posTile.placedItem.Type == ItemType.Briar && Inventory.Peek().Type != ItemType.Axe) {
+                cost = MOVEACTIONS * 2;
+                return true;
+            }
         }
         //3: No underlying conditions, cost is normal move cost
         cost = MOVEACTIONS;
