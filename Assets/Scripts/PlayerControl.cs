@@ -17,23 +17,30 @@ public class PlayerControl : MonoBehaviour
     }
     [SerializeField]
     private int maxActions;//How many possible actions the player can have - can be increased by certain items
+    //This can also be accessed through a getter by other functions (mainly states)
+    public int MaxActions {
+        get {
+            return maxActions;
+        }
+    }
 
-    public const int PICKUPACTIONS = 1;//How many actions picking up an item takes (below is the same for dropping, using, and moving)
-    public const int DROPACTIONS = 1;
-    public const int USEACTIONS = 2;
-    public const int MOVEACTIONS = 1;
+    public readonly int PICKUPACTIONS = 1;//How many actions picking up an item takes (below is the same for dropping, using, and moving)
+    public readonly int DROPACTIONS = 1;
+    public readonly int USEACTIONS = 2;
+    public readonly int MOVEACTIONS = 1;
 
     //A set of possible states the player can be in
     private PlayerState stateMoving;
     private PlayerState stateTakeAction;
-    
+    private PlayerState stateUsing;
+    private PlayerState stateDropping;
+    private PlayerState statePickingUp;
+    private PlayerState statePassTurn;
+
     private PlayerState _currentState;//Whatever state the player is currently in - backup variable
-    public PlayerState CurrentState {//For encapsulation, has a public property for its state
+    public PlayerState CurrentState {//For encapsulation, has a public property for its state - only can be gotten, will only be changed via ChangeState() script
         get {
             return _currentState;
-        }
-        set {
-            _currentState = value;
         }
     }
     void Start()
@@ -46,9 +53,12 @@ public class PlayerControl : MonoBehaviour
         //Each of the player's State's are declared in start
         stateMoving = new PlayerStateMoving(this);
         stateTakeAction = new PlayerStateTakeAction(this);
-
+        stateUsing = new PlayerStateUse(this);
+        stateDropping = new PlayerStateDrop(this);
+        statePickingUp = new PlayerStatePickup(this);
+        statePassTurn = new PlayerStatePassTurn(this);
         //Player starts in TakeActionState
-        CurrentState = stateTakeAction;
+        ChangeState(stateTakeAction);
     }
 
     
@@ -130,5 +140,14 @@ public class PlayerControl : MonoBehaviour
         //3: No underlying conditions, cost is normal move cost
         cost = MOVEACTIONS;
         return true;
+    }
+
+    //Change State Function for the StateMachine:
+    public void ChangeState(PlayerState newState) {
+        if(CurrentState != null) {
+            _currentState.Leave();
+        }
+        _currentState = newState;
+        _currentState.Enter();
     }
 }

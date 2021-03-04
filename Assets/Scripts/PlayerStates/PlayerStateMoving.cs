@@ -5,7 +5,6 @@ using UnityEngine;
 public class PlayerStateMoving : PlayerState
 {
     public PlayerStateMoving(PlayerControl player): base(player) {
-
     }
     public override void Run()
     {
