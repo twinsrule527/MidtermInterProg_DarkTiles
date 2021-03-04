@@ -1875,7 +1875,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -10}
+  m_LocalPosition: {x: -1.5, y: 0.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -2082,9 +2082,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f21abfec75ac8f418dc2a3fff00f344, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraOffset: {x: -2, y: 0}
-  myTileManager: {fileID: 574377563}
+  UpkeepItems: []
+  _cameraOffset: {x: -2, y: 0, z: -10}
   maxActions: 3
+  candlePrefab: {fileID: 7441380274627752056, guid: 63c67b25883f2b54198a74efdb9bd93c,
+    type: 3}
+  useItem: {fileID: 0}
+  movementVector: {x: 0, y: 0, z: 0}
 --- !u!212 &1697075848
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -2143,7 +2147,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1697075846}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.5, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -5}
   m_LocalScale: {x: 0.8, y: 0.8, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

@@ -4,11 +4,9 @@ using UnityEngine;
 
 public class PlayerStatePassTurn : PlayerState
 {
-    public PlayerStatePassTurn(PlayerControl player): base(player) {
-
-    }
     public override void Run()
     {
-        
+       PlayerControl.Instance.StartTurn();
+       PlayerControl.Instance.ChangeState(PlayerControl.Instance.stateTakeAction);
     }
 }

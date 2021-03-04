@@ -9,9 +9,6 @@ public class PlayerStateTakeAction : PlayerState
     private const KeyCode PICKUPKEY = KeyCode.X;
     private const KeyCode DROPKEY = KeyCode.C;
     private const KeyCode ENDTURNKEY = KeyCode.Return;
-    public PlayerStateTakeAction(PlayerControl player): base(player) {
-
-    }
     public override void Run() {
         //The player can enter almost any action here
         //All actions in this Run function follow the same pattern:
@@ -20,47 +17,47 @@ public class PlayerStateTakeAction : PlayerState
             //call the PlayerControl's function for that action (which will change state)
         //First, the player can enter movement:
         if(Input.GetKeyDown(KeyCode.UpArrow)) {
-            if(myPlayer.Actions >= myPlayer.MOVEACTIONS) {
-                myPlayer.Move(new Vector2Int(0, 1));
+            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.MOVEACTIONS) {
+               PlayerControl.Instance.Move(new Vector2Int(0, 1));
             }
         }
         else if(Input.GetKeyDown(KeyCode.DownArrow)) {
-            if(myPlayer.Actions >= myPlayer.MOVEACTIONS) {
-                myPlayer.Move(new Vector2Int(0, -1));
+            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.MOVEACTIONS) {
+               PlayerControl.Instance.Move(new Vector2Int(0, -1));
             }
         }
         else if(Input.GetKeyDown(KeyCode.RightArrow)) {
-            if(myPlayer.Actions >= myPlayer.MOVEACTIONS) {
-                myPlayer.Move(new Vector2Int(1, 0));
+            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.MOVEACTIONS) {
+               PlayerControl.Instance.Move(new Vector2Int(1, 0));
             }
         }
         else if(Input.GetKeyDown(KeyCode.LeftArrow)) {
-            if(myPlayer.Actions >= myPlayer.MOVEACTIONS) {
-                myPlayer.Move(new Vector2Int(-1, 0));
+            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.MOVEACTIONS) {
+               PlayerControl.Instance.Move(new Vector2Int(-1, 0));
             }
         }
         //Second, the player can use whatever Item they are holding
         else if(Input.GetKeyDown(USEKEY)) {
-            if(myPlayer.Actions >= myPlayer.USEACTIONS) {
-                myPlayer.UseItem();
+            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.USEACTIONS) {
+               PlayerControl.Instance.UseItem();
             }
         }
         //Third, the player can pickup item they are on top of
         else if(Input.GetKeyDown(PICKUPKEY)) {
-            if(myPlayer.Actions >= myPlayer.PICKUPACTIONS) {
-                myPlayer.PickUpItem();
+            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.PICKUPACTIONS) {
+               PlayerControl.Instance.PickUpItem();
             }
         }
         //Fourth, the player can drop whatever item they are holding onto their tile
         else if(Input.GetKeyDown(DROPKEY)) {
-            if(myPlayer.Actions >= myPlayer.DROPACTIONS) {
-                myPlayer.DropItem();
+            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.DROPACTIONS) {
+               PlayerControl.Instance.DropItem();
             }
         }
         //Lastly, the player can choose to end their turn early
         else if(Input.GetKeyDown(ENDTURNKEY)) {
             //This is something you can only do after you've taken at least 1 action
-            if(myPlayer.Actions < myPlayer.MaxActions) {
+            if(PlayerControl.Instance.Actions <PlayerControl.Instance.MaxActions) {
                 //TODO: Needs to end turn
             }
         }
