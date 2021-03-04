@@ -40,7 +40,7 @@ public class Item : MonoBehaviour
 
     }
     
-    //Called to check whether the item being held is actually usable at the moment (for ex., a Candle must be able to be dropped to be able to be used)
+    //Called to check whether the item being held is actually usable at the moment (for ex., a Candle must be able to be dropped to be able to be used, or a berry cannot be used while another one's effect is going)
     public virtual bool Usable() {
         return true;
     }

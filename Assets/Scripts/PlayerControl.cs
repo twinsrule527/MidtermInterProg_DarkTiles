@@ -8,28 +8,58 @@ public class PlayerControl : MonoBehaviour
     [SerializeField]
     private Vector2 cameraOffset;//However much the camera should be offset from the player such that the player looks like they're at the center (because of UI)
     public TileManager myTileManager;//TODO: remove this, and all references to this if the TileManager becomes a Singleton
-    private int actions;//How many actions the player has left
+    private int _actions;//How many actions the player has left - backup variable, but also the one that will be set when used by this script
+    //Actions has a getter/setter, because the StateMachine wants to access it - but it can only be set in the PlayerControl
+    public int Actions {
+        get {
+            return _actions;
+        }
+    }
     [SerializeField]
     private int maxActions;//How many possible actions the player can have - can be increased by certain items
 
-    private const int PICKUPACTIONS = 1;//How many actions picking up an item takes (below is the same for dropping, using, and moving)
-    private const int DROPACTIONS = 1;
-    private const int USEACTIONS = 2;
-    private const int MOVEACTIONS = 1;
+    public const int PICKUPACTIONS = 1;//How many actions picking up an item takes (below is the same for dropping, using, and moving)
+    public const int DROPACTIONS = 1;
+    public const int USEACTIONS = 2;
+    public const int MOVEACTIONS = 1;
+
+    //A set of possible states the player can be in
+    private PlayerState stateMoving;
+    private PlayerState stateTakeAction;
+    
+    private PlayerState _currentState;//Whatever state the player is currently in - backup variable
+    public PlayerState CurrentState {//For encapsulation, has a public property for its state
+        get {
+            return _currentState;
+        }
+        set {
+            _currentState = value;
+        }
+    }
     void Start()
     {
+        //Camera's position is set to your position + your offset:
+        Camera.main.transform.position = transform.position + new Vector3(cameraOffset.x, cameraOffset.y, -10f);
+
         Inventory = new Stack<Item>();
-        actions = maxActions;
+        _actions = maxActions;
+        //Each of the player's State's are declared in start
+        stateMoving = new PlayerStateMoving(this);
+        stateTakeAction = new PlayerStateTakeAction(this);
+
+        //Player starts in TakeActionState
+        CurrentState = stateTakeAction;
     }
 
     
     void Update()
     {
-        Camera.main.transform.position = transform.position + new Vector3(cameraOffset.x, cameraOffset.y, -10f);
+        //Camera.main.transform.position = transform.position + new Vector3(cameraOffset.x, cameraOffset.y, -10f);
+        CurrentState.Run();
     }
 
     //Function called when the player attempts to pick up an object
-    private void PickUpItem() {
+    public void PickUpItem() {
         //Gets the Tile that the player is currently standing on
         Vector2Int tempVector = new Vector2Int(Mathf.FloorToInt(transform.position.x), Mathf.FloorToInt(transform.position.y));
         TileTraits currentTile = myTileManager.TileDictionary[tempVector];
@@ -41,12 +71,12 @@ public class PlayerControl : MonoBehaviour
             currentTile.placedItem = null;
             myTileManager.TileDictionary[tempVector] = currentTile;
             itemOnGround.Pickup();
-            actions-= PICKUPACTIONS;
+            _actions-= PICKUPACTIONS;
         }
     }
 
     //Function that drops the top item in your inventory when called
-    private void DropItem() {
+    public void DropItem() {
         //Gets the Tile that the player is standing on
         Vector2Int tempVector = new Vector2Int(Mathf.FloorToInt(transform.position.x), Mathf.FloorToInt(transform.position.y));
         TileTraits currentTile = myTileManager.TileDictionary[tempVector];
@@ -57,23 +87,23 @@ public class PlayerControl : MonoBehaviour
             currentTile.placedItem = droppedItem;
             myTileManager.TileDictionary[tempVector] = currentTile;
             droppedItem.Drop();
-            actions -= DROPACTIONS;
+            _actions -= DROPACTIONS;
         }
     }
 
     //Function that uses the player's currently held item, expending it
-    private void UseItem() {
+    public void UseItem() {
         Item usedItem = Inventory.Peek();
         //Only if the item is able to be used will it pop off and be destroyed (mainly matters for Candle, which cannot be placed on top of another item)
         if(usedItem.Usable()) {
             Inventory.Pop();
             usedItem.Use();
-            actions -= USEACTIONS;
+            _actions -= USEACTIONS;
         }
     }
 
     //Function that allows the player to move in the direction they choose
-    private void Move(Vector2Int direction) {
+    public void Move(Vector2Int direction) {
         //Gets the position you're trying to move to, to see if anything would stop you
         Vector2Int moveToPos = new Vector2Int(Mathf.FloorToInt(transform.position.x), Mathf.FloorToInt(transform.position.y)) + direction;
         int moveCost = 0;
