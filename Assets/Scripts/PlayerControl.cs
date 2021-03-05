@@ -129,6 +129,8 @@ public class PlayerControl : Singleton<PlayerControl>
             movementVector = new Vector3(direction.x, direction.y, 0f);
             //Lose actions equal to the movecost, but clamped at 0
             _actions = Mathf.Clamp(_actions -= moveCost, 0, maxActions);
+            //Whenever you move, you need to see what Chunks are visible - If any do not exist yet, create said chunk
+            TileManager.Instance.CheckChunkExists(transform.position, movementVector);
             //Change states to the movement state
             ChangeState(stateMoving);
         }

@@ -18,6 +18,7 @@ public struct TileTraits {//This Struct is a way to have attributes and function
 public class TileManager : Singleton<TileManager>
 {
     public readonly int NUMOFITEMS = 7;//How many different items there are
+    public const int SCREENRADIUSTILES = 7;//How many away from the edge of the screen is the player in horizontal/vertical directions (including the player themself)
     
     [SerializeField]
     private List<Item> possibleItems;//A list of all possible objects (0 = nothing, 1 = briar bush, 2 = oil, 3 = candle, 4 = berry, 5 = axe, 6 = skull)
@@ -78,7 +79,8 @@ public class TileManager : Singleton<TileManager>
 
     //A function that generates a single tile at the given position - can only be done throught the GenerateGrid code
     private void GenerateTile(Vector2Int pos, int chunkDist) {
-        
+        //If the chunk is fare enough away, it just uses the furthest chunk's distance (currently 8)
+        chunkDist = Mathf.Clamp(chunkDist, 0, FURTHESTCHUNKS-1);
         //Type of Tile generated is random, but depends in part on position in relation to (0, 0):
             //Further away = More dangerous tile, but also higher chance of having an object on the Tile
         float rnd = Random.Range(0f, 100f);
@@ -122,6 +124,41 @@ public class TileManager : Singleton<TileManager>
             }
         }
         TileDictionary.Add(pos, tempTile);
+    }
+
+    //Gets the player position and the direction they're heading, to check to see if a new chunk needs to be generated
+    public void CheckChunkExists(Vector3 pos, Vector3 direction) {
+        Vector3 posToCheck = pos + direction * (SCREENRADIUSTILES) - new Vector3(0.5f, 0.5f, 0);//The last vector 3 is to make it centered on a tile
+        //Turns the single check into 2 checks, one for each corner:
+        Vector3 posToCheck1 = posToCheck;
+        Vector3 posToCheck2 = posToCheck;
+        //If the direction is in the y-direction, goes in both x-directions
+        if(direction.x == 0) {
+            posToCheck1 += new Vector3(1f, 0f, 0f) * SCREENRADIUSTILES;
+            posToCheck2 -= new Vector3(1f, 0f, 0f) * SCREENRADIUSTILES;
+        }
+        else {//Otherwise, goes in both y-directions
+            posToCheck1 += new Vector3(0f, 1f, 0f) * SCREENRADIUSTILES;
+            posToCheck2 -= new Vector3(0f, 1f, 0f) * SCREENRADIUSTILES;
+        }
+        //Now, turns the position into a chunk (first, posToCheck1, then posToCheck2)
+            //Shifting indeces to origin, so that when divided by 25, each chunk fits evenly
+        int xChunk = Mathf.CeilToInt((posToCheck1.x - 12) / 25);
+        int yChunk = Mathf.CeilToInt((posToCheck1.y - 12) / 25);
+        Vector2Int chunkToCheck = new Vector2Int(xChunk, yChunk);
+        //If the chunk does not exist, create the chunk
+        if(!ExistingChunks.ContainsKey(chunkToCheck)) {
+            GenerateChunk(chunkToCheck);
+        }
+        //Now for Pos2
+        xChunk = Mathf.CeilToInt((posToCheck2.x - 12) / 25);
+        yChunk = Mathf.CeilToInt((posToCheck2.y - 12) / 25);
+        chunkToCheck = new Vector2Int(xChunk, yChunk);
+        //If the chunk does not exist, create the chunk
+        if(!ExistingChunks.ContainsKey(chunkToCheck)) {
+            GenerateChunk(chunkToCheck);
+        }
+
     }
 
     public struct spawnProb {//This struct contains the set of data needed to generate a tile in a given chunk

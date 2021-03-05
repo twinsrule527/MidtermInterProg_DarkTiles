@@ -65,5 +65,6 @@ public class ItemCandle : Item
     public override void Awake() {
         base.Awake();
         pickupable = true;
+        Type = ItemType.Candle;
     }
 }
