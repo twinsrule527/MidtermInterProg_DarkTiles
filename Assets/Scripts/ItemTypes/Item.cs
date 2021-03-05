@@ -6,7 +6,7 @@ using UnityEngine;
 //In addition to the Item class, each Item has an enum Type to make it easier to reference
 public enum ItemType {
     
-    
+    Null,
     Briar,
     Oil,
     Candle,
@@ -61,6 +61,11 @@ public class Item : MonoBehaviour
 
     //Called at the end of turn (most objects don't have this, so its only called if they're in a list in the PlayerControl's EndTurn State)
     public virtual void Upkeep() {
+
+    }
+
+    //Called when the object is removed from something - mainly used for when Briar Patches are destroyed/Skulls are destroyed/removed
+    public virtual void RemoveFromBoard(Vector2Int pos) {//Needs input of the tile's current position
 
     }
 }

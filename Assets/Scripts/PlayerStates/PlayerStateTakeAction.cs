@@ -17,47 +17,47 @@ public class PlayerStateTakeAction : PlayerState
             //call the PlayerControl's function for that action (which will change state)
         //First, the player can enter movement:
         if(Input.GetKeyDown(KeyCode.UpArrow)) {
-            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.MOVEACTIONS) {
+            if(PlayerControl.Instance.Actions >=PlayerControl.MOVEACTIONS) {
                PlayerControl.Instance.Move(new Vector2Int(0, 1));
             }
         }
         else if(Input.GetKeyDown(KeyCode.DownArrow)) {
-            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.MOVEACTIONS) {
+            if(PlayerControl.Instance.Actions >=PlayerControl.MOVEACTIONS) {
                PlayerControl.Instance.Move(new Vector2Int(0, -1));
             }
         }
         else if(Input.GetKeyDown(KeyCode.RightArrow)) {
-            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.MOVEACTIONS) {
+            if(PlayerControl.Instance.Actions >=PlayerControl.MOVEACTIONS) {
                PlayerControl.Instance.Move(new Vector2Int(1, 0));
             }
         }
         else if(Input.GetKeyDown(KeyCode.LeftArrow)) {
-            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.MOVEACTIONS) {
+            if(PlayerControl.Instance.Actions >=PlayerControl.MOVEACTIONS) {
                PlayerControl.Instance.Move(new Vector2Int(-1, 0));
             }
         }
         //Second, the player can use whatever Item they are holding
         else if(Input.GetKeyDown(USEKEY)) {
-            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.USEACTIONS) {
+            if(PlayerControl.Instance.Actions >=PlayerControl.USEACTIONS) {
                PlayerControl.Instance.UseItem();
             }
         }
         //Third, the player can pickup item they are on top of
         else if(Input.GetKeyDown(PICKUPKEY)) {
-            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.PICKUPACTIONS) {
+            if(PlayerControl.Instance.Actions >=PlayerControl.PICKUPACTIONS) {
                PlayerControl.Instance.PickUpItem();
             }
         }
         //Fourth, the player can drop whatever item they are holding onto their tile
         else if(Input.GetKeyDown(DROPKEY)) {
-            if(PlayerControl.Instance.Actions >=PlayerControl.Instance.DROPACTIONS) {
+            if(PlayerControl.Instance.Actions >= PlayerControl.DROPACTIONS) {
                PlayerControl.Instance.DropItem();
             }
         }
         //Lastly, the player can choose to end their turn early
         else if(Input.GetKeyDown(ENDTURNKEY)) {
             //This is something you can only do after you've taken at least 1 action
-            if(PlayerControl.Instance.Actions <PlayerControl.Instance.MaxActions) {
+            if(PlayerControl.Instance.Actions < PlayerControl.Instance.MaxActions) {
                 //TODO: Needs to end turn
             }
         }

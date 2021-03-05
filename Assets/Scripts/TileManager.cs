@@ -20,8 +20,14 @@ public class TileManager : Singleton<TileManager>
     public readonly int NUMOFITEMS = 7;//How many different items there are
     public const int SCREENRADIUSTILES = 7;//How many away from the edge of the screen is the player in horizontal/vertical directions (including the player themself)
     
-    [SerializeField]
+    [SerializeField][Header("0Null 1Briar 2Oil 3Candle 4Berry 5Axe 6Skull")]//This header is so that you can see what each element corresponds to in the 3 item lists
     private List<Item> possibleItems;//A list of all possible objects (0 = nothing, 1 = briar bush, 2 = oil, 3 = candle, 4 = berry, 5 = axe, 6 = skull)
+    //Has a getter in case other objects want to access the prefab list (so it only has to appear once)
+    public List<Item> PossibleItems {
+        get {
+            return possibleItems;
+        }
+    }
     [SerializeField]
     private List<float> itemBasePercent;//Probability for each item to spawn at origin chunk
     [SerializeField]
@@ -111,7 +117,7 @@ public class TileManager : Singleton<TileManager>
             //If this goes past the needed number, it either generates (or doesn't generate) the corresponding item
             if(temp >= rnd) {
                 //If no item exists at that spot, nothing happens
-                if(possibleItems[i] == null) {}
+                if(PossibleItems[i] == null) {}
                 //Otherwise, an item is generated, and is added to the TileAttributes
                 else {
                     Item tempItem = Instantiate(possibleItems[i], new Vector3(pos.x +0.5f, pos.y +0.5f, -1), Quaternion.identity);
@@ -159,6 +165,16 @@ public class TileManager : Singleton<TileManager>
             GenerateChunk(chunkToCheck);
         }
 
+    }
+    //This public function allows any object to get all squares adjacent to a specific spot
+    public TileTraits[] GetAdjacency(Vector2Int pos) {
+        TileTraits[] tempArray = new TileTraits[5];
+        tempArray[0] = TileDictionary[pos];//on tile
+        tempArray[1] = TileDictionary[pos + new Vector2Int(1, 0)];//Right
+        tempArray[2] = TileDictionary[pos - new Vector2Int(1, 0)];//Left
+        tempArray[3] = TileDictionary[pos + new Vector2Int(0, 1)];//Up
+        tempArray[4] = TileDictionary[pos - new Vector2Int(0, 1)];//Down
+        return tempArray;
     }
 
     public struct spawnProb {//This struct contains the set of data needed to generate a tile in a given chunk

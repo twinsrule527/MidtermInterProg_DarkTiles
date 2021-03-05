@@ -10,9 +10,11 @@ public class PlayerStateUse : PlayerState
     {
         //Increases time, and leaves state if been going long enough
         curTime+=Time.deltaTime;
-        if(curTime > PlayerControl.Instance.TIMEFORACTION) {
-            
-            UsedItem.Use(1);
+        if(curTime > PlayerControl.TIMEFORACTION) {
+            //Only if the item exists is it called
+            if(UsedItem != null) {
+                UsedItem.Use(1);
+            }
             if(PlayerControl.Instance.Actions <= 0) {
                 PlayerControl.Instance.ChangeState(PlayerControl.Instance.statePassTurn);
             }
@@ -23,7 +25,9 @@ public class PlayerStateUse : PlayerState
         }
         //Otherwise, it calls the Object's use script, in case it has something to do
         else {
-            UsedItem.Use(curTime / PlayerControl.Instance.TIMEFORACTION);
+            if(UsedItem != null) {
+                UsedItem.Use(curTime / PlayerControl.TIMEFORACTION);
+            }
         }
     }
     public override void Enter()

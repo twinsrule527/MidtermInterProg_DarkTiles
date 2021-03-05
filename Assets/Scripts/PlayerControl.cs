@@ -30,12 +30,15 @@ public class PlayerControl : Singleton<PlayerControl>
             return maxActions;
         }
     }
+    public int turnsStimulatedRemaining;//How much longer the player's actions should be doubled due to a Berry (if < 0, they are no longer doubled)
+    private const int ACTIONS_UNSTIMULATED = 3;//How many actions the player should have if not stmulated
+    private const int ACTIONS_STIMULATED = 6;//How many actions the player should have if stimulated
 
-    public readonly int PICKUPACTIONS = 1;//How many actions picking up an item takes (below is the same for dropping, using, and moving)
-    public readonly int DROPACTIONS = 1;
-    public readonly int USEACTIONS = 2;
-    public readonly int MOVEACTIONS = 1;
-    public readonly float TIMEFORACTION = 0.25f;//How long any given action takes to perform - same for everything
+    public const int PICKUPACTIONS = 1;//How many actions picking up an item takes (below is the same for dropping, using, and moving)
+    public const int DROPACTIONS = 1;
+    public const int USEACTIONS = 2;
+    public const int MOVEACTIONS = 1;
+    public const float TIMEFORACTION = 0.25f;//How long any given action takes to perform - same for everything
 
     //A set of possible states the player can be in
     public PlayerState stateMoving = new PlayerStateMoving();
@@ -84,6 +87,7 @@ public class PlayerControl : Singleton<PlayerControl>
             TileManager.Instance.TileDictionary[tempVector] = currentTile;
             itemOnGround.Pickup();
             _actions-= PICKUPACTIONS;
+            ChangeState(statePickingUp);
         }
     }
 
@@ -93,13 +97,14 @@ public class PlayerControl : Singleton<PlayerControl>
         Vector2Int tempVector = new Vector2Int(Mathf.FloorToInt(transform.position.x), Mathf.FloorToInt(transform.position.y));
         TileTraits currentTile = TileManager.Instance.TileDictionary[tempVector];
         //Only if there is no item on the ground there does anything happen
-        if(currentTile.placedItem == null && Inventory.Count > 0) {
+        if(currentTile.placedItem == null && Inventory.Peek().Type != ItemType.Null) {
             //Drops the topmost item in your inventory
             Item droppedItem = Inventory.Pop();
             currentTile.placedItem = droppedItem;
             TileManager.Instance.TileDictionary[tempVector] = currentTile;
             droppedItem.Drop();
             _actions -= DROPACTIONS;
+            ChangeState(stateDropping);
         }
     }
 
@@ -147,9 +152,12 @@ public class PlayerControl : Singleton<PlayerControl>
         //2: A briar patch, takes 2 movement (or all the player's movement if they only have 1 movement left)
             //Also, only occurs if the player is not carrying a hatchet
         else if(posTile.placedItem != null) {
-            if(posTile.placedItem.Type == ItemType.Briar && Inventory.Peek().Type != ItemType.Axe) {
-                cost = MOVEACTIONS * 2;
-                return true;
+            if(posTile.placedItem.Type == ItemType.Briar) {
+                //If the player is not holding an axe, it takes 2 movement
+                if(Inventory.Count == 0 || Inventory.Peek().Type != ItemType.Axe) {
+                    cost = MOVEACTIONS * 2;
+                    return true;
+                }
             }
         }
         //3: No underlying conditions, cost is normal move cost
@@ -168,6 +176,16 @@ public class PlayerControl : Singleton<PlayerControl>
 
     //Function called by the PassTurn state when the player's turn starts, letting the PlayerControl know it has to reset variables
     public void StartTurn() {
+        
+        //If being stimulated by a berry, the player's number of actions are doubled
+        if(turnsStimulatedRemaining > 0) {
+            turnsStimulatedRemaining--;
+            maxActions = ACTIONS_STIMULATED;
+        }
+        else {
+            maxActions = ACTIONS_UNSTIMULATED;
+        }
+        //Actions are refreshed at beginning of turn
         _actions = maxActions;
     }
 }

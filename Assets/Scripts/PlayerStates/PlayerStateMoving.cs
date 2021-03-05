@@ -11,12 +11,12 @@ public class PlayerStateMoving : PlayerState
     {
         curTime += Time.deltaTime;
         //After the max time, it reaches the end
-        if(curTime > PlayerControl.Instance.TIMEFORACTION) curTime = PlayerControl.Instance.TIMEFORACTION;
+        if(curTime > PlayerControl.TIMEFORACTION) curTime = PlayerControl.TIMEFORACTION;
 
-        PlayerControl.Instance.transform.position = Vector3.Lerp(startPos, target, curTime / PlayerControl.Instance.TIMEFORACTION);
+        PlayerControl.Instance.transform.position = Vector3.Lerp(startPos, target, curTime / PlayerControl.TIMEFORACTION);
         Camera.main.transform.position = PlayerControl.Instance.transform.position + PlayerControl.Instance.CameraOffset;
         //After it reaches its target, it goes to the next state
-        if(curTime == PlayerControl.Instance.TIMEFORACTION) {
+        if(curTime == PlayerControl.TIMEFORACTION) {
             //If the player has no actions, they pass the turn
             if(PlayerControl.Instance.Actions <= 0) {
                 PlayerControl.Instance.ChangeState(PlayerControl.Instance.statePassTurn);
