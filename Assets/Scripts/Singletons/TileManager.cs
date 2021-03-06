@@ -300,7 +300,11 @@ public class TileManager : Singleton<TileManager>
                 tempTraits = TileDictionary[new Vector2Int(x, y)];
                 //Only changes the tile itself if it is not where the player is standing
                 if(tempTraits.position != playerPos2Int) {
-                    tempTraits.darkLevel = tempTraits.futureDarkness;
+                    tempTraits.darkLevel = Mathf.Clamp(tempTraits.futureDarkness, tempTraits.darkLevel, MAXDARKLEVEL);//The new darkness is clamped by its current dark level and the max dark level
+                    if(tempTraits.darkLevel >= 7) {
+                        Debug.Log(tempTraits.darkLevel);
+                        Debug.Log(tempTraits.futureDarkness);
+                    }
                     TileDictionary[tempTraits.position] = tempTraits;
                     //Then, refreshes its tile sprite
                     RefreshTile(tempTraits.position);
@@ -334,6 +338,15 @@ public class TileManager : Singleton<TileManager>
         else if(combinedDark >= 5) {
             //Spreads at a cubic root of the remainder of its current darkness +1 divided by 5
             tempTraits.futureDarkness += Mathf.Pow((combinedDark + 1) % 5, 1f / 3f );
+        }
+        //Then, the future darkness is changed depending on the position's relation to the origin:
+        //Each chunk away from the origin subtracts a decreasing amount from their future darkness
+        //This part depends on how well fueled the Lantern is - making it beneficial to keep the Lantern at a high fuel amount
+        tempTraits.futureDarkness -= LANTERN.Fuel / (Lantern.FUEL_BASE * Mathf.Sqrt(1f + tempTraits.chunk));
+        //If it is in the "0" chunk, there is an additional effect:
+        if(tempTraits.chunk == 0) {
+            //Small decrease in future darkness depending on position relative to Lantern
+            tempTraits.futureDarkness -= 0.25f / (Mathf.Abs(tempTraits.position.x) + Mathf.Abs(tempTraits.position.y) + 0.5f);
         }
         TileDictionary[tempTraits.position] = tempTraits;
     }

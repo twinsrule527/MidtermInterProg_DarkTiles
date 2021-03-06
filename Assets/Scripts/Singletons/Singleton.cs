@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+//SAME SINGLETON CODE as the one provided in class
+    //Only change made is I removed the DontDestroyOnLoad bc I wanted the Singletons to be reloaded
+    
 // This is a simplified version of the following commonly used Unity singleton.
 // http://wiki.unity3d.com/index.php/Singleton
 // The original version avoids some common bugs but is more complex to understand.

@@ -7,9 +7,16 @@ using UnityEngine;
 public class Lantern : Item
 {
     private const int START_LIGHT_RADIUS = 4;//The starting radius at which the Lantern applies effects to when it is created
+    private const float START_FUEL = 15;//How much fuel the Lantern starts with
+    private const float FUEL_UPKEEP = 0.5f;//How much fuel the Lantern loses per upkeep step
+    public const float FUEL_BASE = 60;//Inverse multiplier for the Lantern's effect on decreasing darkness
+    public float Fuel;//How much fuel is currently in the Lantern
+    
+    
     //On start, will lower the darkness value of nearby Tiles
     void Start() {
         base.Awake();
+        Fuel = START_FUEL;
         pickupable = false;
         Type = ItemType.Lantern;
         //The 9x9 square around the Lantern must have dark values maxed by their distance from the Lantern
@@ -57,5 +64,11 @@ public class Lantern : Item
     public override bool Placed()
     {
         return true;
+    }
+    
+    //The lantern's upkeep is that it loses fuel, decreasing its overall power - when it reaches 0, the player loses
+    public override void Upkeep()
+    {
+        Fuel -= FUEL_UPKEEP;
     }
 }
