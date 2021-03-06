@@ -12,7 +12,8 @@ public enum ItemType {
     Candle,
     Berry,
     Axe,
-    Skull
+    Skull,
+    Lantern
 }
 public class Item : MonoBehaviour
 {
@@ -40,7 +41,8 @@ public class Item : MonoBehaviour
     
     //Called when the item is dropped on the ground
     public virtual void Drop() {
-
+        mySpriteRenderer.enabled = true;
+        transform.position = PlayerControl.Instance.transform.position + new Vector3(0, 0, 1);
     }
 
     //Called when you use the item - unique to each item type - consumes the item
@@ -54,11 +56,6 @@ public class Item : MonoBehaviour
         return true;
     }
 
-    //Called during update while you are holding the item if the item has a special ability
-    public virtual void Hold() {
-
-    }
-
     //Called at the end of turn (most objects don't have this, so its only called if they're in a list in the PlayerControl's EndTurn State)
     public virtual void Upkeep() {
 
@@ -67,5 +64,10 @@ public class Item : MonoBehaviour
     //Called when the object is removed from something - mainly used for when Briar Patches are destroyed/Skulls are destroyed/removed
     public virtual void RemoveFromBoard(Vector2Int pos) {//Needs input of the tile's current position
 
+    }
+
+    //Whether the object is placed on the ground (not dropped) - at the current only matters for the Candle
+    public virtual bool Placed() {
+        return false;
     }
 }

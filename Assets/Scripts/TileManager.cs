@@ -10,13 +10,20 @@ public struct TileTraits {//This Struct is a way to have attributes and function
     public TileBase thisTile;//The Specific Tile from the Tile Palette that this Tile is
     public float darkLevel;//The level of darkness the tile currently has
     public int darkModifier;//Any modifiers applied to the tile are added here - The Tile's effective darkness = darkLevel + darkModifier (clamped at 0 and 15)
+    public float futureDarkness;//How dark the Tile will be after the current action is over
     public Item placedItem;//If there is an item on the tile, this is the Item on the Tile
-
+    public bool darkCause;//Whether this Tile creates darkness on nearby darkness when first generated (only referenced once)
+    public int chunk;//Which chunk the Tile is in relative to the origin
 }
 
 //Made this a Singleton, because there are several things that need to reference it - It possibly could be abstract - Need to ask Prof
 public class TileManager : Singleton<TileManager>
 {
+    //The TileManager spawns a Lantern at the beginning of the game
+        //That lantern then becomes call-able by any script
+    [SerializeField]
+    private Lantern lanternPrefab;
+    public static Lantern LANTERN;
     public readonly int NUMOFITEMS = 7;//How many different items there are
     public const int SCREENRADIUSTILES = 7;//How many away from the edge of the screen is the player in horizontal/vertical directions (including the player themself)
     
@@ -58,6 +65,8 @@ public class TileManager : Singleton<TileManager>
             SpawnChunks.Add(tempProb);
         }
         GenerateChunk(new Vector2Int(0, 0));
+        //Instantiates the Lantern at (0, 0), which will change the light value of nearby objects
+        LANTERN = Instantiate(lanternPrefab, new Vector3(0.5f, 0.5f, -1f), Quaternion.identity);
     }
 
     
@@ -66,6 +75,9 @@ public class TileManager : Singleton<TileManager>
     //Meant to replace the Grid generation code. Generates groups in chunks, such that each chunk is 25x25
         //The input pos is the Chunk position. Multiplying it by 25 gets the center of this new chunk
     public void GenerateChunk(Vector2Int pos) {
+        //First, because I forgot to do this earlier, this chunk is added to the List of Chunks
+        ExistingChunks.Add(pos, true);
+
         //Position is gotten as the bottom left corner of the chunk
         int xStart = pos.x * CHUNKWIDTH - (CHUNKWIDTH - 1) / 2;
         int yStart = pos.y * CHUNKWIDTH - (CHUNKWIDTH - 1) / 2;
@@ -79,6 +91,30 @@ public class TileManager : Singleton<TileManager>
                 if(!TileDictionary.ContainsKey(tempVector) ) {
                     GenerateTile(tempVector, distFromOrigin);
                 }
+            }
+        }
+        //Then for each tile, if its a dark enough tile, it darkens adjacent tiles
+        for(int x = xStart; x < xStart + CHUNKWIDTH; x++) {
+            for(int y = yStart; y < yStart + CHUNKWIDTH; y++) {
+                //Get the current position
+                Vector2Int tempVector = new Vector2Int(x, y);
+                //If the chosen position is a DarkCause, it creates adjacent tiles on all possible adjacent ones
+                if(TileDictionary[tempVector].darkCause) {
+                    TileTraits[] tempTraits = GetAdjacency(tempVector);
+                    for(int i = 1; i < tempTraits.Length; i++) {
+                        //Only spreads to lower level darkness
+                        if(!tempTraits[i].darkCause) {
+                            tempTraits[i].darkLevel++;
+                            TileDictionary[tempTraits[i].position] = tempTraits[i];
+                        }
+                    }
+                }
+            }
+        }
+        //finally, every tile is refreshed in case its sprite needs to change
+        for(int x = xStart; x < xStart + CHUNKWIDTH; x++) {
+            for(int y = yStart; y < yStart + CHUNKWIDTH; y++) {
+                RefreshTile(new Vector2Int(x, y));
             }
         }
     }
@@ -107,6 +143,13 @@ public class TileManager : Singleton<TileManager>
         tempTile.position = pos;
         tempTile.darkLevel = darkTemp;
         tempTile.darkModifier = 0;
+        tempTile.futureDarkness = darkTemp;
+        tempTile.darkCause = false;
+        tempTile.chunk = chunkDist;
+        //If the tile is one of the super dark tiles, it is considered a cause of darkness
+        if(darkTemp >=12) {
+            tempTile.darkCause = true;
+        }
         tempTile.placedItem = null;//Sets the placed item as null as a precaution
         //Now, determine what item is on the chunk, if any
         rnd = Random.Range(0f, SpawnChunks[chunkDist].totalItemSpawnProb);
@@ -132,6 +175,7 @@ public class TileManager : Singleton<TileManager>
         TileDictionary.Add(pos, tempTile);
     }
 
+    //THIS ISN"T QUITE WORKING RIGHT NOW
     //Gets the player position and the direction they're heading, to check to see if a new chunk needs to be generated
     public void CheckChunkExists(Vector3 pos, Vector3 direction) {
         Vector3 posToCheck = pos + direction * (SCREENRADIUSTILES) - new Vector3(0.5f, 0.5f, 0);//The last vector 3 is to make it centered on a tile
@@ -166,14 +210,151 @@ public class TileManager : Singleton<TileManager>
         }
 
     }
+
+    //Input a tile, and the TileManager checks its darkLevel to see if it needs to change sprites
+    public void RefreshTile(Vector2Int pos) {
+        TileTraits tempTraits = TileDictionary[pos];
+        int darkTemp = Mathf.Clamp(Mathf.FloorToInt(tempTraits.darkLevel + tempTraits.darkModifier), 0, MAXDARKLEVEL);
+        tempTraits.thisTile = DarknessLevelTile[darkTemp];
+        myTilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), DarknessLevelTile[darkTemp]);
+        TileDictionary[pos] = tempTraits;
+    }
+
+    //This function is called at the end of each turn. Does the darkness spread that occurs at the end of every turn
+    public void IncreaseDarknessEndTurnTiles(Vector3 playerPos) {
+        //Get the bottom corner of the screen position
+            //While most things Floor, this Ceilings, because the distance is actually 1 less than the screen radius, rather the actual screen radius
+        Vector2Int startPos = new Vector2Int(Mathf.CeilToInt(playerPos.x - SCREENRADIUSTILES), Mathf.CeilToInt(playerPos.y - SCREENRADIUSTILES));
+        //Reset all dark modifiers in the 13 x 13 grid, and then modifiers are reset by objects ontop/near them
+        List<Item> ItemsOnBoard = new List<Item>();//This dictionary gets all items on the board with attributes that matter, so that dark/lightness can be affected
+        //Runs through all correct objects in the TileDictionary
+        TileTraits tempTraits;//Declared early, so that it only is declared once
+        for(int x = startPos.x; x < startPos.x + (SCREENRADIUSTILES *2 - 1); x++) {
+            for(int y = startPos.y; y < startPos.y + (SCREENRADIUSTILES *2 - 1); y++) {
+                tempTraits = TileDictionary[new Vector2Int(x, y)];
+                tempTraits.darkModifier = 0;
+                //Future darkness is also set to be its current darkness
+                tempTraits.futureDarkness = tempTraits.darkLevel;
+                //if it has a placed item, and the item is a PLACED CANDLE or a Skull, its added to the list
+                if(tempTraits.placedItem != null) {
+                    if(tempTraits.placedItem.Type == ItemType.Skull) {
+                        ItemsOnBoard.Add(tempTraits.placedItem);
+                    }
+                    else if(tempTraits.placedItem.Type == ItemType.Candle && tempTraits.placedItem.Placed()) {
+                        //If it's a candle, and it has been placed on the ground through the Use option, it is added to the list
+                        ItemsOnBoard.Add(tempTraits.placedItem);
+                        
+                    }
+                }
+                TileDictionary[tempTraits.position] = tempTraits;
+            }
+        }
+        //Next, it runs through the List of items, changing dark modifiers as needed
+        for(int i = 0; i < ItemsOnBoard.Count; i++) {
+            Vector2Int tempPos = new Vector2Int(Mathf.FloorToInt(ItemsOnBoard[i].transform.position.x), Mathf.FloorToInt(ItemsOnBoard[i].transform.position.y));
+            tempTraits = TileDictionary[tempPos];
+            //For skull, increase the dark modifier of the tile it is on
+            if(ItemsOnBoard[i].Type == ItemType.Skull) {
+                tempTraits.darkModifier += ItemSkull.SELF_DARKNESS;
+                TileDictionary[tempTraits.position] = tempTraits;
+            }
+            else if(ItemsOnBoard[i].Type == ItemType.Candle) {
+                //Candle will run through its decreasing light script, which includes setting darkness
+                //It falls under the candle's "Use" Function at an int value of 2
+                ItemsOnBoard[i].Use(2);
+            }
+        }
+        //Next, if the player is holding a Candle or a Skull, it changes the darkmodifier of adjacent tiles
+        TileTraits[] playerPosArray = GetAdjacency(new Vector2Int(Mathf.FloorToInt(playerPos.x), Mathf.FloorToInt(playerPos.y)));
+        if(PlayerControl.Instance.InventoryPeek.Type == ItemType.Skull) {
+            //if holding a skull, increases adjacent tiles darkness by one
+            for(int i = 1; i < playerPosArray.Length; i ++) {
+                playerPosArray[i].darkModifier++;
+                TileDictionary[playerPosArray[i].position] = playerPosArray[i];
+            }
+        }
+        else if(PlayerControl.Instance.InventoryPeek.Type == ItemType.Candle) {
+            //If holding a candle, decreases adjacent tile darkness by 1
+            for(int i = 1; i < playerPosArray.Length; i ++) {
+                playerPosArray[i].darkModifier--;
+                TileDictionary[playerPosArray[i].position] = playerPosArray[i];
+            }
+        }
+
+        //Goes through every tile, updating its darkness level, and then refreshing the tile
+        for(int x = startPos.x; x < startPos.x + (SCREENRADIUSTILES *2 - 1); x++) {
+            for(int y = startPos.y; y < startPos.y + (SCREENRADIUSTILES *2 - 1); y++) {
+                //Gets the current tile
+                //Updates the tile's darkness
+                TileUpdateDarkness(new Vector2Int(x, y));
+                    //Doesn't need to do the usual setting TileDictionary = tempTraits, bc the two Functions refresh everything needed
+                //TileDictionary[tempTraits.position] = tempTraits;
+            }
+        }
+        //Gets the playerPos as a 2DVector int so that the Tile the player is standing on doesn't change
+        Vector2Int playerPos2Int = new Vector2Int(Mathf.FloorToInt(PlayerControl.Instance.transform.position.x), Mathf.FloorToInt(PlayerControl.Instance.transform.position.y));
+        //Lastly, all Tiles have their future darkness become their current darkness, then they are refreshed
+        for(int x = startPos.x; x < startPos.x + (SCREENRADIUSTILES *2 - 1); x++) {
+            for(int y = startPos.y; y < startPos.y + (SCREENRADIUSTILES *2 - 1); y++) {
+                //Sets the Tile to its new darkness level
+                tempTraits = TileDictionary[new Vector2Int(x, y)];
+                //Only changes the tile itself if it is not where the player is standing
+                if(tempTraits.position != playerPos2Int) {
+                    tempTraits.darkLevel = tempTraits.futureDarkness;
+                    TileDictionary[tempTraits.position] = tempTraits;
+                    //Then, refreshes its tile sprite
+                    RefreshTile(tempTraits.position);
+                }
+            }
+        }
+
+    }
+
+
+    public const int DARK_SPREAD_TIMES = 4;//How many times the darkness will spread if it is at a level of 10 or higher
+    //Called as part of the end turn function - increases darkness depending on the tile's darkness level
+        //Doesn't actually update the tile at the moment, just sets its future darkness to be updated
+    public void TileUpdateDarkness(Vector2Int pos) {
+        TileTraits tempTraits = TileDictionary[pos];
+        float combinedDark = tempTraits.darkLevel + tempTraits.darkModifier;
+        //At 10 or above, darkness spreads to adjacent tiles
+        if(combinedDark >= 10) {
+            TileTraits[] chooseTiles = GetAdjacency(tempTraits.position);
+            //Increases 4 times, each at a power of 1/4 Sqrt(combinedDark - 9)
+            for(int i = 0; i < DARK_SPREAD_TIMES; i++) {
+                int rnd = Random.Range(1, chooseTiles.Length);
+                chooseTiles[rnd].futureDarkness += (Mathf.Sqrt(combinedDark - 9) / DARK_SPREAD_TIMES);
+            }
+            //Add each tile gotten through the adjacency back to the TileDictionary
+            for(int i = 0; i < chooseTiles.Length; i++) {
+                TileDictionary[chooseTiles[i].position] = chooseTiles[i];
+            }
+        }
+        //At 5 or above, darkness spreads to itself - doesn't at 10 or above - TESTING THIS
+        else if(combinedDark >= 5) {
+            //Spreads at a cubic root of the remainder of its current darkness +1 divided by 5
+            tempTraits.futureDarkness += Mathf.Pow((combinedDark + 1) % 5, 1f / 3f );
+        }
+        TileDictionary[tempTraits.position] = tempTraits;
+    }
+
+    [SerializeField][Header("Tiles adjacent to chosen Tile")]
+    private Vector2Int[] AdjacencyArray;//GIves the adjacency relation of all tiles adjacent to a given tile
     //This public function allows any object to get all squares adjacent to a specific spot
     public TileTraits[] GetAdjacency(Vector2Int pos) {
-        TileTraits[] tempArray = new TileTraits[5];
-        tempArray[0] = TileDictionary[pos];//on tile
-        tempArray[1] = TileDictionary[pos + new Vector2Int(1, 0)];//Right
-        tempArray[2] = TileDictionary[pos - new Vector2Int(1, 0)];//Left
-        tempArray[3] = TileDictionary[pos + new Vector2Int(0, 1)];//Up
-        tempArray[4] = TileDictionary[pos - new Vector2Int(0, 1)];//Down
+        //Gets the tiles - If they do not exist, you generate them
+        TileTraits[] tempArray = new TileTraits[AdjacencyArray.Length];
+        for(int i = 0; i < AdjacencyArray.Length; i++) {
+            //For each tile, it first checks if it exists
+            if(TileDictionary.ContainsKey(pos + AdjacencyArray[i])) {
+                tempArray[i] = TileDictionary[pos + AdjacencyArray[i]];
+            }
+            //Otherwise, it generates the tile, but at and then adds it to the dictionary - but at the adjacent tile's chunk
+            else {
+                GenerateTile(pos + AdjacencyArray[i], TileDictionary[pos].chunk);
+                tempArray[i] = TileDictionary[pos + AdjacencyArray[i]];
+            }
+        }
         return tempArray;
     }
 

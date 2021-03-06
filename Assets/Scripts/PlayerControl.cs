@@ -5,6 +5,11 @@ using UnityEngine;
 public class PlayerControl : Singleton<PlayerControl>
 {
     private Stack<Item> Inventory;//The player's inventory is a stack of Items
+    public Item InventoryPeek {//This allows any script that wants to to Peek at the top of the InventoryStack
+        get {
+            return Inventory.Peek();
+        }
+    }
     public List<Item> UpkeepItems = new List<Item>();//A list of items with an upkeep value - Used by the PassTurnState
     
     [SerializeField]
@@ -30,6 +35,7 @@ public class PlayerControl : Singleton<PlayerControl>
             return maxActions;
         }
     }
+    private bool freeActionMove;//Whether or not the player has a free Move action available - granted by Holding the Berry
     public int turnsStimulatedRemaining;//How much longer the player's actions should be doubled due to a Berry (if < 0, they are no longer doubled)
     private const int ACTIONS_UNSTIMULATED = 3;//How many actions the player should have if not stmulated
     private const int ACTIONS_STIMULATED = 6;//How many actions the player should have if stimulated
@@ -60,6 +66,7 @@ public class PlayerControl : Singleton<PlayerControl>
         Camera.main.transform.position = transform.position + CameraOffset;
 
         Inventory = new Stack<Item>();
+        Inventory.Push(GetComponentInChildren<NullItem>());
         _actions = maxActions;
 
         //Player starts in TakeActionState
@@ -134,6 +141,11 @@ public class PlayerControl : Singleton<PlayerControl>
             movementVector = new Vector3(direction.x, direction.y, 0f);
             //Lose actions equal to the movecost, but clamped at 0
             _actions = Mathf.Clamp(_actions -= moveCost, 0, maxActions);
+            //If you have a free move action because you're carrying a berry, this action costs 1 less to do
+            if(freeActionMove) {
+                freeActionMove = false;
+                _actions++;
+            }
             //Whenever you move, you need to see what Chunks are visible - If any do not exist yet, create said chunk
             TileManager.Instance.CheckChunkExists(transform.position, movementVector);
             //Change states to the movement state
@@ -184,6 +196,17 @@ public class PlayerControl : Singleton<PlayerControl>
         }
         else {
             maxActions = ACTIONS_UNSTIMULATED;
+        }
+        //If the player is holding a berry, they get one free action
+        if(Inventory.Peek().Type == ItemType.Berry) {
+            freeActionMove = true;//The first time you take a move action this turn, it doesn't cost anything
+        }
+        else {
+            freeActionMove = false;
+        }
+        //Upkeep items are kept up with
+        for(int i = 0; i< UpkeepItems.Count; i++) {
+            UpkeepItems[i].Upkeep();
         }
         //Actions are refreshed at beginning of turn
         _actions = maxActions;

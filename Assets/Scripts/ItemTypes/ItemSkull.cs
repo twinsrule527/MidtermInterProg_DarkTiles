@@ -9,7 +9,7 @@ using UnityEngine.Tilemaps;
 public class ItemSkull : Item
 {
     public const int SELF_DARKNESS = 4;//How much darkness is added to the Tile this object is on top of
-    public const int USE_SPREAD_DARKNESS = 4;//How much the darkness spreads by at first when you use the USE action
+    public const int USE_SPREAD_DARKNESS = 4;//How much the darkness spreads by when you use the USE action
     //TODO: Make all of them Start, rather than Awake?
     public void Start()
     {
@@ -17,35 +17,35 @@ public class ItemSkull : Item
         pickupable = true;
         Type = ItemType.Skull;
         //The Tile it starts on has its darkness increased
-        TileTraits tempTraits = TileManager.Instance.TileDictionary[new Vector2Int(Mathf.FloorToInt(transform.position.x), Mathf.FloorToInt(transform.position.y))];
+        Vector2Int tempPos = new Vector2Int(Mathf.FloorToInt(transform.position.x), Mathf.FloorToInt(transform.position.y));
+        TileTraits tempTraits = TileManager.Instance.TileDictionary[tempPos];
         if(tempTraits.darkLevel == 0) {
             tempTraits.darkLevel = 1;
         }
         tempTraits.darkModifier += SELF_DARKNESS;
-        TileManager.Instance.TileDictionary[new Vector2Int(Mathf.FloorToInt(transform.position.x), Mathf.FloorToInt(transform.position.y))] = tempTraits;
-        //Rest is going to have to be done through the TileManager
-        //TODO: Need a function to deal with this
+        TileManager.Instance.TileDictionary[tempPos] = tempTraits;
+        //Rest is going to have to be done through the TileManager - Tile is refreshed to match the correct color
+        TileManager.Instance.RefreshTile(tempPos);
 
     }
     public override void Use(float perTime)
     {
         if(perTime == 0) {
-        //Choose a random nearby tile (or multiple, and increase its darkness)
-            //Current idea: Increase a random adjacent tile by 4, a random adjacent tile by 3, by 2, by 1
+        //Choose a random nearby tile (or multiple, and increase its darkness) - Increase darkness by 1 4 times
+            //REMOVED IDEA: idea: Increase a random adjacent tile by 4, a random adjacent tile by 3, by 2, by 1
         Vector2Int tempPos = new Vector2Int(Mathf.FloorToInt(PlayerControl.Instance.transform.position.x), Mathf.FloorToInt(PlayerControl.Instance.transform.position.y));
         TileTraits[] gottenTiles = TileManager.Instance.GetAdjacency(tempPos);
-        //Picks a random number from adjacent tiles (excluding its own tile) 4 times, each time, with decreasing potency of the darkness it gives - until potency = 0
-        int darkPotent = USE_SPREAD_DARKNESS;
-        while(darkPotent > 0) {
+        //Picks a random number from adjacent tiles (excluding its own tile) a number of times  =  to the darknesses potency
+       for(int i = 0; i < USE_SPREAD_DARKNESS; i++) {
             //Will not pick the 0th element, because it will not spread darkness on where you're standing
             int rnd = Random.Range(1, gottenTiles.Length);
-            gottenTiles[rnd].darkLevel = Mathf.Clamp(gottenTiles[rnd].darkLevel + darkPotent, 0, TileManager.MAXDARKLEVEL);
-            //Potency of the darkness spreading decreases
-            darkPotent--;
+            gottenTiles[rnd].darkLevel = Mathf.Clamp(gottenTiles[rnd].darkLevel + 1, 0, TileManager.MAXDARKLEVEL);
         }
         //Then, the gotten tiles become the tiles in the dictionary
         for(int i = 1; i < gottenTiles.Length; i ++ ) {
             TileManager.Instance.TileDictionary[gottenTiles[i].position] = gottenTiles[i];
+            //Refresh all those tiles
+            TileManager.Instance.RefreshTile(gottenTiles[i].position);
         }
         
         //Finally, the Skull is destroyed
@@ -57,6 +57,17 @@ public class ItemSkull : Item
     public override void Drop()
     {
         base.Drop();
+        Vector2Int tempPos = new Vector2Int(Mathf.FloorToInt(PlayerControl.Instance.transform.position.x), Mathf.FloorToInt(PlayerControl.Instance.transform.position.y));
+        //Same thing occurs as when start is declared
+        TileTraits tempTraits = TileManager.Instance.TileDictionary[tempPos];
+        if(tempTraits.darkLevel == 0) {
+            tempTraits.darkLevel = 1;
+        }
+        tempTraits.darkModifier += SELF_DARKNESS;
+        TileManager.Instance.TileDictionary[tempPos] = tempTraits;
+        //Rest is going to have to be done through the TileManager - Tile is refreshed to match the correct color
+        TileManager.Instance.RefreshTile(tempPos);
+
     }
 
     //When this is removed from the void, it resets the Darkness Modifier of where it was
@@ -69,5 +80,7 @@ public class ItemSkull : Item
         //Also, remove the item from the TileDictionary
         tempTraits.placedItem = null;
         TileManager.Instance.TileDictionary[pos] = tempTraits;
+        //Tile is then refreshed
+        TileManager.Instance.RefreshTile(pos);
     }
 }
