@@ -301,10 +301,6 @@ public class TileManager : Singleton<TileManager>
                 //Only changes the tile itself if it is not where the player is standing
                 if(tempTraits.position != playerPos2Int) {
                     tempTraits.darkLevel = Mathf.Clamp(tempTraits.futureDarkness, tempTraits.darkLevel, MAXDARKLEVEL);//The new darkness is clamped by its current dark level and the max dark level
-                    if(tempTraits.darkLevel >= 7) {
-                        Debug.Log(tempTraits.darkLevel);
-                        Debug.Log(tempTraits.futureDarkness);
-                    }
                     TileDictionary[tempTraits.position] = tempTraits;
                     //Then, refreshes its tile sprite
                     RefreshTile(tempTraits.position);

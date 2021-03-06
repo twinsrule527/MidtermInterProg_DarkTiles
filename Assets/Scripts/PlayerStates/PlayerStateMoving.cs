@@ -17,6 +17,15 @@ public class PlayerStateMoving : PlayerState
         Camera.main.transform.position = PlayerControl.Instance.transform.position + PlayerControl.Instance.CameraOffset;
         //After it reaches its target, it goes to the next state
         if(curTime == PlayerControl.TIMEFORACTION) {
+            //Check to see if the player is on (0, 0) and is holding an Oil - If they are, they go into the Loop state of placing Oil in the Lantern
+            if(Mathf.FloorToInt(target.x) == 0 && Mathf.FloorToInt(target.y) == 0) {
+                Item tempItem = PlayerControl.Instance.InventoryPeek;
+                if(tempItem.Type == ItemType.Oil) {
+                    //Go into the Player's state of dropping Oil into the lantern
+                    PlayerControl.Instance.ChangeState(PlayerControl.Instance.stateRefueling);
+                    return;
+                }
+            }
             //If the player has no actions, they pass the turn
             if(PlayerControl.Instance.Actions <= 0) {
                 PlayerControl.Instance.ChangeState(PlayerControl.Instance.statePassTurn);

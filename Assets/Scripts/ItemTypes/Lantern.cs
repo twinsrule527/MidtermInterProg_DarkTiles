@@ -10,6 +10,7 @@ public class Lantern : Item
     private const float START_FUEL = 15;//How much fuel the Lantern starts with
     private const float FUEL_UPKEEP = 0.5f;//How much fuel the Lantern loses per upkeep step
     public const float FUEL_BASE = 60;//Inverse multiplier for the Lantern's effect on decreasing darkness
+    public const float FUEL_PER_OIL = 5;//How much fuel each Oil used gives to the Lantern
     public float Fuel;//How much fuel is currently in the Lantern
     
     

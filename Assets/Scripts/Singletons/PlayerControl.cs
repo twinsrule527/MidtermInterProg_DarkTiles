@@ -53,6 +53,7 @@ public class PlayerControl : Singleton<PlayerControl>
     public PlayerState stateDropping = new PlayerStateDrop();
     public PlayerState statePickingUp = new PlayerStatePickup();
     public PlayerState statePassTurn = new PlayerStatePassTurn();
+    public PlayerState stateRefueling = new PlayerStateRefueling();
 
     private PlayerState _currentState;//Whatever state the player is currently in - backup variable
     public PlayerState CurrentState {//For encapsulation, has a public property for its state - only can be gotten, will only be changed via ChangeState() script
@@ -210,5 +211,20 @@ public class PlayerControl : Singleton<PlayerControl>
         }
         //Actions are refreshed at beginning of turn
         _actions = maxActions;
+    }
+
+    //This function pops the top item in your inventory and refuels the Lantern
+        //Returns true if that all occurs
+    public void Refuel( out bool fueled) {
+        //If the top of the Inventory is Oil, it refuels
+        if(Inventory.Peek().Type == ItemType.Oil) {
+            Inventory.Pop();
+            TileManager.LANTERN.Fuel += Lantern.FUEL_PER_OIL;
+            fueled = true;
+        }
+        //Otherwise it lets you know it failed to refuel
+        else {
+            fueled = false;
+        }
     }
 }
