@@ -32,6 +32,13 @@ public class Item : MonoBehaviour
             return mySpriteRenderer;
         }
     }
+    [SerializeField]
+    protected SpriteRenderer myAura;//Each Item has an aura that surrounds it when it's dropped/used
+    public SpriteRenderer MyAura {
+        get {
+            return myAura;
+        }
+    }
     public virtual void Awake() {
         mySpriteRenderer = GetComponent<SpriteRenderer>();
     }
@@ -42,11 +49,13 @@ public class Item : MonoBehaviour
     public virtual void Pickup() {
         //Object becomes invisible
         mySpriteRenderer.enabled = false;
+        myAura.enabled = false;
     }
     
     //Called when the item is dropped on the ground
     public virtual void Drop() {
         mySpriteRenderer.enabled = true;
+        myAura.enabled = true;
         transform.position = PlayerControl.Instance.transform.position + new Vector3(0, 0, 1);
     }
 

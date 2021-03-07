@@ -94,4 +94,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd4ff27d195ade14caf306fb461786a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myAura: {fileID: 4983294547329506142}
   pickupable: 0

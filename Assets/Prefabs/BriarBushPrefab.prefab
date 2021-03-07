@@ -94,6 +94,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c8fed29a1b3c9548be4eb69ea0d0886, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myAura: {fileID: 2481802222398497064}
   pickupable: 0
   probItemSpawn:
   - 4

@@ -94,4 +94,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c78f7cd3588fe34aab70c6fdbf4fb37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myAura: {fileID: 9106086165918717055}
   pickupable: 0
+  Fuel: 0
