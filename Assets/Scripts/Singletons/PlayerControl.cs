@@ -95,6 +95,9 @@ public class PlayerControl : Singleton<PlayerControl>
             TileManager.Instance.TileDictionary[tempVector] = currentTile;
             itemOnGround.Pickup();
             _actions-= PICKUPACTIONS;
+            //The Action bar moves down
+            StartCoroutine(TileManager.Instance.RefreshActionUI(_actions, _actions + PICKUPACTIONS, TIMEFORACTION));
+            
             ChangeState(statePickingUp);
         }
     }
@@ -112,6 +115,9 @@ public class PlayerControl : Singleton<PlayerControl>
             TileManager.Instance.TileDictionary[tempVector] = currentTile;
             droppedItem.Drop();
             _actions -= DROPACTIONS;
+            //The Action bar moves down
+            StartCoroutine(TileManager.Instance.RefreshActionUI(_actions, _actions + DROPACTIONS, TIMEFORACTION));
+            
             ChangeState(stateDropping);
         }
     }
@@ -126,6 +132,9 @@ public class PlayerControl : Singleton<PlayerControl>
             Inventory.Pop();
             UsedItem.Use(0);
             _actions -= USEACTIONS;
+            //The Action bar moves down
+            StartCoroutine(TileManager.Instance.RefreshActionUI(_actions, _actions + USEACTIONS, TIMEFORACTION));
+            
             ChangeState(stateUsing);
         }
     }
@@ -140,6 +149,7 @@ public class PlayerControl : Singleton<PlayerControl>
         if(CanMoveTo(TileManager.Instance.TileDictionary[moveToPos], out moveCost)) {
             //If you're able to move to the given position, you do move
             movementVector = new Vector3(direction.x, direction.y, 0f);
+            int actionsTemp = _actions;//Needs a temp variable to check how many actions it has before changes are made
             //Lose actions equal to the movecost, but clamped at 0
             _actions = Mathf.Clamp(_actions -= moveCost, 0, maxActions);
             //If you have a free move action because you're carrying a berry, this action costs 1 less to do
@@ -147,6 +157,8 @@ public class PlayerControl : Singleton<PlayerControl>
                 freeActionMove = false;
                 _actions++;
             }
+            //The Action bar moves down
+            StartCoroutine(TileManager.Instance.RefreshActionUI(_actions, actionsTemp, TIMEFORACTION));
             //Whenever you move, you need to see what Chunks are visible - If any do not exist yet, create said chunk
             TileManager.Instance.CheckChunkExists(transform.position, movementVector);
             //Change states to the movement state
@@ -185,6 +197,8 @@ public class PlayerControl : Singleton<PlayerControl>
         }
         _currentState = newState;
         _currentState.Enter();
+        //When you change state, the game also checks the Top Item in the Inventory, in case it needs to be changed:
+        TileManager.Instance.RefreshTopInventory();
     }
 
     //Function called by the PassTurn state when the player's turn starts, letting the PlayerControl know it has to reset variables
@@ -194,9 +208,12 @@ public class PlayerControl : Singleton<PlayerControl>
         if(turnsStimulatedRemaining > 0) {
             turnsStimulatedRemaining--;
             maxActions = ACTIONS_STIMULATED;
+            //Makes sure the player has the right ActionBar
+            TileManager.Instance.CheckActionBar(true);
         }
         else {
             maxActions = ACTIONS_UNSTIMULATED;
+            TileManager.Instance.CheckActionBar(false);
         }
         //If the player is holding a berry, they get one free action
         if(Inventory.Peek().Type == ItemType.Berry) {
@@ -209,8 +226,11 @@ public class PlayerControl : Singleton<PlayerControl>
         for(int i = 0; i< UpkeepItems.Count; i++) {
             UpkeepItems[i].Upkeep();
         }
+        //Action bar is refreshes with actions
+        StartCoroutine(TileManager.Instance.RefreshActionUI(maxActions, _actions, TIMEFORACTION));
         //Actions are refreshed at beginning of turn
         _actions = maxActions;
+            
     }
 
     //This function pops the top item in your inventory and refuels the Lantern

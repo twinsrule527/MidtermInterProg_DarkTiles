@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 //A Manager that has various functions to be called regarding changes made to the Tilemap
+//Also manages the game's UI elements
 
 [System.Serializable]//TODO: Might remove this, if unneeded
 public struct TileTraits {//This Struct is a way to have attributes and functions attached to each Tile in the game
@@ -24,6 +26,19 @@ public class TileManager : Singleton<TileManager>
     [SerializeField]
     private Lantern lanternPrefab;
     public static Lantern LANTERN;
+    
+    //The Manager also gets all the UI elements that it might need to change
+    [SerializeField]
+    private Image TopInventory;//This is the object which displays the top item in your inventory
+    public Image ActionBarBorder;//The border object for the action charges
+    public Sprite[] ActionBarBorderSprite;//The different available sprites for the ActionBarBorder
+    [SerializeField]
+    private Image ActionChargesImage;//The Image which shows how actions you have available
+    [SerializeField]
+    private float ActionsChargesImageYBase;//Where the bottom of the Action Charges image should always be
+    private const int SPRITE_HEIGHT_PER_ACTION = 72;//How tall every action of the image is - allows for re-fixing its size - reduced using an IENumerator
+    
+    
     public readonly int NUMOFITEMS = 7;//How many different items there are
     public const int SCREENRADIUSTILES = 7;//How many away from the edge of the screen is the player in horizontal/vertical directions (including the player themself)
     
@@ -67,8 +82,9 @@ public class TileManager : Singleton<TileManager>
         GenerateChunk(new Vector2Int(0, 0));
         //Instantiates the Lantern at (0, 0), which will change the light value of nearby objects
         LANTERN = Instantiate(lanternPrefab, new Vector3(0.5f, 0.5f, -1f), Quaternion.identity);
+        //The action bar is also refreshed to your normal max actions
+        StartCoroutine(RefreshActionUI(PlayerControl.Instance.MaxActions, 0, 0.5f));//Fills the entire action bar very quickly
     }
-
     
     public const int CHUNKWIDTH = 25;//The width of a chunk is a constant 25 tiles (same for height)
 
@@ -373,6 +389,45 @@ public class TileManager : Singleton<TileManager>
         public float[] itemSpawnProb;//Probability of different items spawning at this distance fromt the origin
         public float totalItemSpawnProb;//The total of all the item spawn probabilities
     }
+
+    //This function changes the sprite of the Item in your inventory on the UI to match the correct item
+    public void RefreshTopInventory() {
+        Item tempTop = PlayerControl.Instance.InventoryPeek;
+        if(tempTop.Type != ItemType.Null) {
+            if(TopInventory.sprite != tempTop.MySpriteRenderer.sprite) {
+                TopInventory.sprite = tempTop.MySpriteRenderer.sprite;
+            }
+        }
+    }
+
+    //This Enumerator will refresh the player's action bar or decrease it, over the time it takes for the player to do what they are doing
+    public IEnumerator RefreshActionUI(float curActions, float prevActions, float timeTo) {
+        float curTime = 0;
+        while(curTime < timeTo) {
+            curTime += Time.deltaTime;
+            ActionChargesImage.transform.localScale = new Vector3(ActionChargesImage.transform.localScale.x, Mathf.Lerp(prevActions, curActions, curTime / timeTo), ActionChargesImage.transform.localScale.z);
+            //Because the expansion happens in both direcitons, it also needs to fix its position
+                //It fixes position by having its y-value be changed by 1/2 of whatever the over change was
+            ActionChargesImage.transform.localPosition = new Vector3(ActionChargesImage.transform.localPosition.x, ActionsChargesImageYBase + ActionChargesImage.transform.localScale.y / 2 * SPRITE_HEIGHT_PER_ACTION, ActionChargesImage.transform.localPosition.z);
+            yield return 0;
+        }
+        ActionChargesImage.transform.localScale = new Vector3(ActionChargesImage.transform.localScale.x, curActions, ActionChargesImage.transform.localScale.z);
+        ActionChargesImage.transform.localPosition = new Vector3(ActionChargesImage.transform.localPosition.x, ActionsChargesImageYBase + ActionChargesImage.transform.localScale.y / 2 * SPRITE_HEIGHT_PER_ACTION, ActionChargesImage.transform.localPosition.z);
+        yield return 0;
+    }
+    //This function is called at the beginning of the player's turn, to see if the ActionBarBack needs to be changed
+    public void CheckActionBar(bool stimulated) {
+        //Player inputs whether the player is currently stimulated or not, and that determines which ActionBarBorder is active
+        if(stimulated) {
+            ActionBarBorder.sprite = ActionBarBorderSprite[1];
+        }
+        else {
+            ActionBarBorder.sprite = ActionBarBorderSprite[0];
+        }
+    }
+
+
+
 
     /*REMOVED THIS FUNCTION, because I replaced it with the ChunkGenerating one
     //A function that randomly generates a grid of Tiles inside a defined area

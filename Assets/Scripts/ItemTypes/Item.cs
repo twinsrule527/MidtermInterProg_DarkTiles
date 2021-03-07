@@ -27,6 +27,11 @@ public class Item : MonoBehaviour
         }
     }
     protected SpriteRenderer mySpriteRenderer;
+    public SpriteRenderer MySpriteRenderer {
+        get {
+            return mySpriteRenderer;
+        }
+    }
     public virtual void Awake() {
         mySpriteRenderer = GetComponent<SpriteRenderer>();
     }
