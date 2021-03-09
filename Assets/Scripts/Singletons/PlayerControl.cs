@@ -61,6 +61,9 @@ public class PlayerControl : Singleton<PlayerControl>
             return _currentState;
         }
     }
+    [SerializeField]
+    private ActionBar myActionBar;//Keeps track of the Action bar, so it can call its functions
+
     void Start()
     {
         //Camera's position is set to your position + your offset:
@@ -96,7 +99,7 @@ public class PlayerControl : Singleton<PlayerControl>
             itemOnGround.Pickup();
             _actions-= PICKUPACTIONS;
             //The Action bar moves down
-            StartCoroutine(TileManager.Instance.RefreshActionUI(_actions, _actions + PICKUPACTIONS, TIMEFORACTION));
+            StartCoroutine(myActionBar.RefreshActionUI(_actions, _actions + PICKUPACTIONS, TIMEFORACTION));
             
             ChangeState(statePickingUp);
         }
@@ -116,7 +119,7 @@ public class PlayerControl : Singleton<PlayerControl>
             droppedItem.Drop();
             _actions -= DROPACTIONS;
             //The Action bar moves down
-            StartCoroutine(TileManager.Instance.RefreshActionUI(_actions, _actions + DROPACTIONS, TIMEFORACTION));
+            StartCoroutine(myActionBar.RefreshActionUI(_actions, _actions + DROPACTIONS, TIMEFORACTION));
             
             ChangeState(stateDropping);
         }
@@ -133,7 +136,7 @@ public class PlayerControl : Singleton<PlayerControl>
             UsedItem.Use(0);
             _actions -= USEACTIONS;
             //The Action bar moves down
-            StartCoroutine(TileManager.Instance.RefreshActionUI(_actions, _actions + USEACTIONS, TIMEFORACTION));
+            StartCoroutine(myActionBar.RefreshActionUI(_actions, _actions + USEACTIONS, TIMEFORACTION));
             
             ChangeState(stateUsing);
         }
@@ -158,7 +161,7 @@ public class PlayerControl : Singleton<PlayerControl>
                 _actions++;
             }
             //The Action bar moves down
-            StartCoroutine(TileManager.Instance.RefreshActionUI(_actions, actionsTemp, TIMEFORACTION));
+            StartCoroutine(myActionBar.RefreshActionUI(_actions, actionsTemp, TIMEFORACTION));
             //Whenever you move, you need to see what Chunks are visible - If any do not exist yet, create said chunk
             TileManager.Instance.CheckChunkExists(transform.position, movementVector);
             //Change states to the movement state
@@ -209,11 +212,11 @@ public class PlayerControl : Singleton<PlayerControl>
             turnsStimulatedRemaining--;
             maxActions = ACTIONS_STIMULATED;
             //Makes sure the player has the right ActionBar
-            TileManager.Instance.CheckActionBar(true);
+            myActionBar.CheckActionBar(true);
         }
         else {
             maxActions = ACTIONS_UNSTIMULATED;
-            TileManager.Instance.CheckActionBar(false);
+            myActionBar.CheckActionBar(false);
         }
         //If the player is holding a berry, they get one free action
         if(Inventory.Peek().Type == ItemType.Berry) {
@@ -227,7 +230,7 @@ public class PlayerControl : Singleton<PlayerControl>
             UpkeepItems[i].Upkeep();
         }
         //Action bar is refreshes with actions
-        StartCoroutine(TileManager.Instance.RefreshActionUI(maxActions, _actions, TIMEFORACTION));
+        StartCoroutine(myActionBar.RefreshActionUI(maxActions, _actions, TIMEFORACTION));
         //Actions are refreshed at beginning of turn
         _actions = maxActions;
             
