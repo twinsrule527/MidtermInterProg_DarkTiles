@@ -31,6 +31,8 @@ public class TileManager : Singleton<TileManager>
     //The Manager also gets all the UI elements that it might need to change
     [SerializeField]
     private Image TopInventory;//This is the object which displays the top item in your inventory
+    [SerializeField]
+    private Text LanternLevel;//The Text object that holds the light level of the lantern
     
     public readonly int NUMOFITEMS = 7;//How many different items there are
     public const int SCREENRADIUSTILES = 7;//How many away from the edge of the screen is the player in horizontal/vertical directions (including the player themself)
@@ -75,6 +77,7 @@ public class TileManager : Singleton<TileManager>
         GenerateChunk(new Vector2Int(0, 0));
         //Instantiates the Lantern at (0, 0), which will change the light value of nearby objects
         LANTERN = Instantiate(lanternPrefab, new Vector3(0.5f, 0.5f, -1f), Quaternion.identity);
+        LANTERN.LevelIndicator = LanternLevel;
         //The action bar is also refreshed to your normal max actions
     }
     

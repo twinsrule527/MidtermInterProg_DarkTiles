@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 //A script for all of the player's possible controls: Movement, pickup, drop, and use items.
 public class PlayerControl : Singleton<PlayerControl>
 {
@@ -61,9 +62,11 @@ public class PlayerControl : Singleton<PlayerControl>
             return _currentState;
         }
     }
+    //Has a few UI elements that it keeps track of
     [SerializeField]
     private ActionBar myActionBar;//Keeps track of the Action bar, so it can call its functions
-
+    [SerializeField]
+    private Text playerPosText;
     void Start()
     {
         //Camera's position is set to your position + your offset:
@@ -75,6 +78,11 @@ public class PlayerControl : Singleton<PlayerControl>
 
         //Player starts in TakeActionState
         ChangeState(stateTakeAction);
+        string playerPos = "Position: \n" +
+                            "X - 0 \n" +
+                            "Y - 0";
+                            
+        playerPosText.text = playerPos;
     }
 
     
@@ -160,6 +168,8 @@ public class PlayerControl : Singleton<PlayerControl>
                 freeActionMove = false;
                 _actions++;
             }
+            //Player's position as shown on UI is updated
+            RefreshPlayerPosText(transform.position + movementVector);
             //The Action bar moves down
             StartCoroutine(myActionBar.RefreshActionUI(_actions, actionsTemp, TIMEFORACTION));
             //Whenever you move, you need to see what Chunks are visible - If any do not exist yet, create said chunk
@@ -249,5 +259,14 @@ public class PlayerControl : Singleton<PlayerControl>
         else {
             fueled = false;
         }
+    }
+
+    //Changes the position recorded in the positionText UI element
+    private void RefreshPlayerPosText(Vector3 pos) {
+        Vector2Int playerPos2Int = new Vector2Int(Mathf.FloorToInt(pos.x), Mathf.FloorToInt(pos.y));
+        string myText = "Position: \n" +
+                        "X - " + playerPos2Int.x.ToString() + "\n" +
+                        "Y - " + playerPos2Int.y.ToString();
+        playerPosText.text = myText;
     }
 }

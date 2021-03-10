@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 //The Lantern is an item at the origin (0, 0) that cannot be picked up.
     //The game ends when the lantern runs out of fuel. It can be refueled with the Oil Item.
     //The Lantern slows darkness spread in accordance with how much it has been fueled.
@@ -12,7 +13,7 @@ public class Lantern : Item
     public const float FUEL_BASE = 60;//Inverse multiplier for the Lantern's effect on decreasing darkness
     public const float FUEL_PER_OIL = 5;//How much fuel each Oil used gives to the Lantern
     public float Fuel;//How much fuel is currently in the Lantern
-    
+    public Text LevelIndicator;//Text object that shows light level - Assigned by TileManager
     
     //On start, will lower the darkness value of nearby Tiles
     void Start() {
@@ -53,6 +54,8 @@ public class Lantern : Item
         TileManager.Instance.TileDictionary[tempTraits.position] = tempTraits;
         //Tile is refreshed
         TileManager.Instance.RefreshTile(tempTraits.position);
+        //its own light level is also refreshed
+        RefreshLevel();
     }
 
     //if the game somehow glitches such that you end up carrying the Lantern, this stops you from using it
@@ -71,5 +74,13 @@ public class Lantern : Item
     public override void Upkeep()
     {
         Fuel -= FUEL_UPKEEP;
+        RefreshLevel();
+    }
+
+    //Refreshes the Text that shows the light level
+    private void RefreshLevel() {
+        string levelText = "Lantern Light: \n" +
+                           Mathf.FloorToInt(Fuel).ToString();
+        LevelIndicator.text = levelText;
     }
 }
