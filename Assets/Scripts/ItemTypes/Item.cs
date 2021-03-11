@@ -56,6 +56,9 @@ public class Item : MonoBehaviour
     public virtual void Drop() {
         mySpriteRenderer.enabled = true;
         myAura.enabled = true;
+        //Aura grows around the object again
+        //Isn't quite working
+        StartCoroutine(ChangeAura(PlayerControl.Instance.transform.position, 0, 1, PlayerControl.TIMEFORACTION, true));
         transform.position = PlayerControl.Instance.transform.position + new Vector3(0, 0, 1);
     }
 
@@ -83,5 +86,28 @@ public class Item : MonoBehaviour
     //Whether the object is placed on the ground (not dropped) - at the current only matters for the Candle
     public virtual bool Placed() {
         return false;
+    }
+
+    //This IEnumerator changes the size of the object's aura:
+        //It starts from a certain size, and increases over time until it reaches an end size
+            //stayVisible says whether the aura should disappear after the IEnumerator ends
+            //Also assigns a position that the aura should be at
+    public IEnumerator ChangeAura(Vector3 pos, float startScale, float endScale, float timeChange, bool stayVisible) {
+        myAura.enabled = true;
+        transform.position = pos;
+        float currentTime = 0;
+        Vector3 startScaleVector = new Vector3(startScale, startScale, startScale);
+        Vector3 endScaleVector = new Vector3(endScale, endScale, endScale);
+        //Increases over time
+        while(currentTime < timeChange) {
+            currentTime+=Time.deltaTime;
+            myAura.transform.localScale = Vector3.Lerp(startScaleVector, endScaleVector, currentTime / timeChange);
+            yield return null;
+        }
+        if(!stayVisible) {
+            myAura.enabled = false;
+            myAura.transform.localScale = Vector3.one;
+        }
+        yield return null;
     }
 }

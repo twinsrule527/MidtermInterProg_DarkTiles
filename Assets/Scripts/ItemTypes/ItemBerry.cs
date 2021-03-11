@@ -29,7 +29,13 @@ public class ItemBerry : Item
         if(perTime == 0) {
             //Make the player stimulated for future turns
             PlayerControl.Instance.turnsStimulatedRemaining = STIMULANT_TURNS;
-
+            
+            //Aura grows to be the size of the player before disappearing
+            StartCoroutine(ChangeAura(PlayerControl.Instance.transform.position, 0, 1, PlayerControl.TIMEFORACTION, false));
+        
+            
+        }
+        else if(perTime == 1) {
             //Then, the berry is destroyed
             Destroy(gameObject);
         }

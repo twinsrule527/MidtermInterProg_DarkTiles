@@ -36,6 +36,8 @@ public class ItemCandle : Item
             radius0Light = MAX0LIGHT;
             //Still needs to actually assign light values to those tiles
             SetDarkness();
+            //Aura grows:
+            StartCoroutine(ChangeAura(PlayerControl.Instance.transform.position, 0, 4, PlayerControl.TIMEFORACTION, true));
         }
         //This is called at the end of the turn once a Candle has been played - Affects the dark value of nearby tiles
         else if(perTime == 2) {
@@ -67,6 +69,8 @@ public class ItemCandle : Item
         base.Upkeep();
         //Light levels go down during Upkeep
         radius0Light--;
+        //Aura will also shrink
+        StartCoroutine(ChangeAura(transform.position, (radius0Light + 1) / 3f, radius0Light / 3f, PlayerControl.TIMEFORACTION, true));
         //Larger radius light only goes down if it is above 0
         if(radius1Light > 0) {
             radius1Light--;

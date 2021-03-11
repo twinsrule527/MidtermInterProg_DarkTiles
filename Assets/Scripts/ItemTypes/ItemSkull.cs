@@ -47,9 +47,12 @@ public class ItemSkull : Item
             //Refresh all those tiles
             TileManager.Instance.RefreshTile(gottenTiles[i].position);
         }
-        
-        //Finally, the Skull is destroyed
-        Destroy(gameObject);
+        //Aura grows around the player, and then will disappear, as the darkness spreads
+        StartCoroutine(ChangeAura(PlayerControl.Instance.transform.position, 0, 4, PlayerControl.TIMEFORACTION, false));
+        }
+        else if(perTime == 1) {
+            //Finally, the Skull is destroyed
+            Destroy(gameObject);
         }
     }
 

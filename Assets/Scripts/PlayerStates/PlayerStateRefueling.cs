@@ -12,6 +12,7 @@ public class PlayerStateRefueling : PlayerState
         if(curTime >= PlayerControl.TIMEFORACTION) {
             bool checkRefuel = false;
             PlayerControl.Instance.Refuel(out checkRefuel);
+            TileManager.LANTERN.RefreshLevel();
             //if they do refuel, curTime is set back to 0
             if(checkRefuel) {
                 curTime = 0;

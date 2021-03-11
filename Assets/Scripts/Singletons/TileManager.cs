@@ -33,6 +33,8 @@ public class TileManager : Singleton<TileManager>
     private Image TopInventory;//This is the object which displays the top item in your inventory
     [SerializeField]
     private Text LanternLevel;//The Text object that holds the light level of the lantern
+    [SerializeField]
+    private Image DarkField;//A dark aura used by the Lantern object
     
     public readonly int NUMOFITEMS = 7;//How many different items there are
     public const int SCREENRADIUSTILES = 7;//How many away from the edge of the screen is the player in horizontal/vertical directions (including the player themself)
@@ -78,6 +80,7 @@ public class TileManager : Singleton<TileManager>
         //Instantiates the Lantern at (0, 0), which will change the light value of nearby objects
         LANTERN = Instantiate(lanternPrefab, new Vector3(0.5f, 0.5f, -1f), Quaternion.identity);
         LANTERN.LevelIndicator = LanternLevel;
+        LANTERN.DarkAura = DarkField;
         //The action bar is also refreshed to your normal max actions
     }
     
@@ -389,9 +392,14 @@ public class TileManager : Singleton<TileManager>
     public void RefreshTopInventory() {
         Item tempTop = PlayerControl.Instance.InventoryPeek;
         if(tempTop.Type != ItemType.Null) {
+            TopInventory.enabled = true;
             if(TopInventory.sprite != tempTop.MySpriteRenderer.sprite) {
                 TopInventory.sprite = tempTop.MySpriteRenderer.sprite;
             }
+        }
+        //It becomes invisible if there are no objects in your inventory
+        else {
+            TopInventory.enabled = false;
         }
     }
 

@@ -8,13 +8,15 @@ using UnityEngine.UI;
 public class Lantern : Item
 {
     private const int START_LIGHT_RADIUS = 4;//The starting radius at which the Lantern applies effects to when it is created
-    private const float START_FUEL = 15;//How much fuel the Lantern starts with
+    private const float START_FUEL = 20;//How much fuel the Lantern starts with
     private const float FUEL_UPKEEP = 0.5f;//How much fuel the Lantern loses per upkeep step
     public const float FUEL_BASE = 60;//Inverse multiplier for the Lantern's effect on decreasing darkness
     public const float FUEL_PER_OIL = 5;//How much fuel each Oil used gives to the Lantern
     public float Fuel;//How much fuel is currently in the Lantern
     public Text LevelIndicator;//Text object that shows light level - Assigned by TileManager
-    
+    public Image DarkAura;//This image is a darkness which covers the entire screen, becoming more visible with a lower Lantern Level
+    private const int BASE_FUEL = 15;//Base fuel is used for when the DarkAura appears
+    private const float MAX_AURA_ALPHA = 0.5f;//How dark the Lantern's aura can get
     //On start, will lower the darkness value of nearby Tiles
     void Start() {
         base.Awake();
@@ -74,13 +76,39 @@ public class Lantern : Item
     public override void Upkeep()
     {
         Fuel -= FUEL_UPKEEP;
+        //DarkAura is shown depending on your Lantern's light level
+        if(Fuel < BASE_FUEL) {
+            float alpha = Mathf.Lerp(0, MAX_AURA_ALPHA, BASE_FUEL - Fuel);
+            DarkAura.color = new Color(DarkAura.color.r, DarkAura.color.g, DarkAura.color.b, alpha);
+        }
+        else {
+            DarkAura.color = new Color(DarkAura.color.r, DarkAura.color.g, DarkAura.color.b, 0);
+        }
         RefreshLevel();
+        if(Fuel <= 0) {
+            //TODO: Game ends if you have no fuel left
+
+        }
     }
 
     //Refreshes the Text that shows the light level
-    private void RefreshLevel() {
+    public void RefreshLevel() {
         string levelText = "Lantern Light: \n" +
                            Mathf.FloorToInt(Fuel).ToString();
         LevelIndicator.text = levelText;
+    }
+
+    //This float plus the Enumerator below make the DarkAura fade to black when the game ends
+    private const float FADE_TIME = 5f;
+    private IEnumerator FadeToBlack() {
+        float currentTime = 0;
+        while(currentTime < FADE_TIME) {
+            currentTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(MAX_AURA_ALPHA, 1, currentTime / FADE_TIME);
+            DarkAura.color = new Color(DarkAura.color.r, DarkAura.color.g, DarkAura.color.b, alpha);
+            yield return null;
+        }
+        //Then, the ENDGAME occurs
+        yield return null;
     }
 }

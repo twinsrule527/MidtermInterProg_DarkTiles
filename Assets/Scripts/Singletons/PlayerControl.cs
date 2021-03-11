@@ -45,7 +45,8 @@ public class PlayerControl : Singleton<PlayerControl>
     public const int DROPACTIONS = 1;
     public const int USEACTIONS = 2;
     public const int MOVEACTIONS = 1;
-    public const float TIMEFORACTION = 0.25f;//How long any given action takes to perform - same for everything
+    public const float TIMEFORACTION = 0.5f;//How long any given action takes to perform - same for everything
+    private const int SLOW_DARK_LEVEL = 10;//The level of darkness a tile needs to be for it to be hard for you to stand on it
 
     //A set of possible states the player can be in
     public PlayerState stateMoving = new PlayerStateMoving();
@@ -55,6 +56,7 @@ public class PlayerControl : Singleton<PlayerControl>
     public PlayerState statePickingUp = new PlayerStatePickup();
     public PlayerState statePassTurn = new PlayerStatePassTurn();
     public PlayerState stateRefueling = new PlayerStateRefueling();
+    public PlayerState stateNoAction = new PlayerStateNoAction();
 
     private PlayerState _currentState;//Whatever state the player is currently in - backup variable
     public PlayerState CurrentState {//For encapsulation, has a public property for its state - only can be gotten, will only be changed via ChangeState() script
@@ -63,8 +65,7 @@ public class PlayerControl : Singleton<PlayerControl>
         }
     }
     //Has a few UI elements that it keeps track of
-    [SerializeField]
-    private ActionBar myActionBar;//Keeps track of the Action bar, so it can call its functions
+    public ActionBar myActionBar;//Keeps track of the Action bar, so it can call its functions
     [SerializeField]
     private Text playerPosText;
     void Start()
@@ -79,8 +80,8 @@ public class PlayerControl : Singleton<PlayerControl>
         //Player starts in TakeActionState
         ChangeState(stateTakeAction);
         string playerPos = "Position: \n" +
-                            "X - 0 \n" +
-                            "Y - 0";
+                            "X: 0 \n" +
+                            "Y: 0";
                             
         playerPosText.text = playerPos;
     }
@@ -111,6 +112,10 @@ public class PlayerControl : Singleton<PlayerControl>
             
             ChangeState(statePickingUp);
         }
+        else {
+            //Otherwise, it changes to the quick noActionState, where the action bar flashes red
+            ChangeState(stateNoAction);
+        }
     }
 
     //Function that drops the top item in your inventory when called
@@ -131,6 +136,10 @@ public class PlayerControl : Singleton<PlayerControl>
             
             ChangeState(stateDropping);
         }
+        else {
+            //Otherwise, it changes to the quick noActionState, where the action bar flashes red
+            ChangeState(stateNoAction);
+        }
     }
 
     public Item UsedItem;//A reference variable for the currently variable being used for the State Machine
@@ -148,11 +157,16 @@ public class PlayerControl : Singleton<PlayerControl>
             
             ChangeState(stateUsing);
         }
+        else {
+             //Otherwise, it changes to the quick noActionState, where the action bar flashes red
+            ChangeState(stateNoAction);
+        }
     }
 
 
     public Vector3 movementVector;//Used as a placeholder, which is called by the PlayerStateMoving when you move into its state
     //Function that allows the player to move in the direction they choose
+        //Moving is the only action that takes half the normal time
     public void Move(Vector2Int direction) {
         //Gets the position you're trying to move to, to see if anything would stop you
         Vector2Int moveToPos = new Vector2Int(Mathf.FloorToInt(transform.position.x), Mathf.FloorToInt(transform.position.y)) + direction;
@@ -171,11 +185,15 @@ public class PlayerControl : Singleton<PlayerControl>
             //Player's position as shown on UI is updated
             RefreshPlayerPosText(transform.position + movementVector);
             //The Action bar moves down
-            StartCoroutine(myActionBar.RefreshActionUI(_actions, actionsTemp, TIMEFORACTION));
+            StartCoroutine(myActionBar.RefreshActionUI(_actions, actionsTemp, TIMEFORACTION / 2f));
             //Whenever you move, you need to see what Chunks are visible - If any do not exist yet, create said chunk
             TileManager.Instance.CheckChunkExists(transform.position, movementVector);
             //Change states to the movement state
             ChangeState(stateMoving);
+        }
+        else {
+             //Otherwise, it changes to the quick noActionState, where the action bar flashes red
+            ChangeState(stateNoAction);
         }
     }
 
@@ -187,7 +205,12 @@ public class PlayerControl : Singleton<PlayerControl>
             cost = 0;
             return false;
         }
-        //2: A briar patch, takes 2 movement (or all the player's movement if they only have 1 movement left)
+        //2: high dark level, but not too high: Movement cose extra
+        else if(posTile.darkLevel + posTile.darkModifier >= SLOW_DARK_LEVEL) {
+            cost = MOVEACTIONS * 2;
+            return true;
+        }
+        //3: A briar patch, takes 2 movement (or all the player's movement if they only have 1 movement left)
             //Also, only occurs if the player is not carrying a hatchet
         else if(posTile.placedItem != null) {
             if(posTile.placedItem.Type == ItemType.Briar) {
@@ -198,7 +221,7 @@ public class PlayerControl : Singleton<PlayerControl>
                 }
             }
         }
-        //3: No underlying conditions, cost is normal move cost
+        //4: No underlying conditions, cost is normal move cost
         cost = MOVEACTIONS;
         return true;
     }
@@ -265,8 +288,8 @@ public class PlayerControl : Singleton<PlayerControl>
     private void RefreshPlayerPosText(Vector3 pos) {
         Vector2Int playerPos2Int = new Vector2Int(Mathf.FloorToInt(pos.x), Mathf.FloorToInt(pos.y));
         string myText = "Position: \n" +
-                        "X - " + playerPos2Int.x.ToString() + "\n" +
-                        "Y - " + playerPos2Int.y.ToString();
+                        "X: " + playerPos2Int.x.ToString() + "\n" +
+                        "Y: " + playerPos2Int.y.ToString();
         playerPosText.text = myText;
     }
 }

@@ -12,8 +12,12 @@ public class ActionBar : MonoBehaviour
     [SerializeField]
     private float ActionsChargesImageYBase;//Where the bottom of the Action Charges image should always be
     private const int SPRITE_HEIGHT_PER_ACTION = 72;//How tall every action of the image is - allows for re-fixing its size - reduced using an IENumerator
-    
+    private Image myImage;
+    private Color baseColor;
+    private Color changeColor = Color.red;
     void Start() {
+        myImage = GetComponent<Image>();
+        baseColor = myImage.color;
         //At start, refreshes actions
         StartCoroutine(RefreshActionUI(PlayerControl.Instance.MaxActions, 0, 0.5f));//Fills the entire action bar very quickly
     }
@@ -42,5 +46,33 @@ public class ActionBar : MonoBehaviour
         else {
             ActionBarBorder.sprite = ActionBarBorderSprite[0];
         }
+    }
+
+    private const int NUM_OF_FLASHES = 2;//How many times the bar should flash red when you try to take an unavailable action
+
+    //With this Coroutine, the Action bar flashes red for a short while, until the player is able to take an action
+        //Occurs when the player attempts a not-allowed action
+    public IEnumerator UnavailableAction(float timeFlash) {
+        float currentTime = 0;
+        myImage.color = changeColor;
+        //Flashes one color
+        while(currentTime < timeFlash / (NUM_OF_FLASHES + 1f) ) {
+            currentTime += Time.deltaTime;
+            yield return null;
+        }
+        //Flashes other color
+        myImage.color = baseColor;
+        while(currentTime < timeFlash * 2f / (NUM_OF_FLASHES + 1f) ) {
+            currentTime += Time.deltaTime;
+            yield return null;
+        }
+        //Flashes first color again
+        myImage.color = changeColor;
+        while(currentTime < timeFlash * 3f / (NUM_OF_FLASHES + 1f) ) {
+            currentTime += Time.deltaTime;
+            yield return null;
+        }
+        myImage.color = baseColor;
+        yield return null;
     }
 }
