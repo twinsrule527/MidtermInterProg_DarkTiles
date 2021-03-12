@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class Lantern : Item
 {
     private const int START_LIGHT_RADIUS = 4;//The starting radius at which the Lantern applies effects to when it is created
-    private const float START_FUEL = 20;//How much fuel the Lantern starts with
+    private const float START_FUEL = 15;//How much fuel the Lantern starts with
     private const float FUEL_UPKEEP = 0.4f;//How much fuel the Lantern loses per upkeep step
     public const float FUEL_BASE = 60;//Inverse multiplier for the Lantern's effect on decreasing darkness
     public const float FUEL_PER_OIL = 5;//How much fuel each Oil used gives to the Lantern
@@ -16,7 +16,7 @@ public class Lantern : Item
     public Text LevelIndicator;//Text object that shows light level - Assigned by TileManager
     public Image DarkAura;//This image is a darkness which covers the entire screen, becoming more visible with a lower Lantern Level
     private const int BASE_FUEL = 15;//Base fuel is used for when the DarkAura appears
-    private const float MAX_AURA_ALPHA = 0.5f;//How dark the Lantern's aura can get
+    private const float MAX_AURA_ALPHA = 0.3f;//How dark the Lantern's aura can get
     //On start, will lower the darkness value of nearby Tiles
     void Start() {
         base.Awake();
@@ -85,7 +85,7 @@ public class Lantern : Item
             DarkAura.color = new Color(DarkAura.color.r, DarkAura.color.g, DarkAura.color.b, 0);
         }
         RefreshLevel();
-        if(Fuel <= 0) {
+        if(Fuel <= 0.5f) {
             //Game ends
             StartCoroutine(FadeToBlack());
 
@@ -110,6 +110,9 @@ public class Lantern : Item
             yield return null;
         }
         //Then, the ENDGAME occurs
+        TileManager.Instance.EndGame();
+        //The player enters their endgame state
+        PlayerControl.Instance.ChangeState(PlayerControl.Instance.stateEndGame);
         yield return null;
     }
 }

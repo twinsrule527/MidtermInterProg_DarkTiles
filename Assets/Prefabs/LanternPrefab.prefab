@@ -71,8 +71,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: e27826550f6c8754eaa318c52e91a2cd, type: 3}
-  m_Color: {r: 0.9842434, g: 1, b: 0, a: 1}
+  m_Sprite: {fileID: 21300000, guid: d0603ffd6ec06c14db33488a54bf7f23, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -97,3 +97,5 @@ MonoBehaviour:
   myAura: {fileID: 9106086165918717055}
   pickupable: 0
   Fuel: 0
+  LevelIndicator: {fileID: 0}
+  DarkAura: {fileID: 0}

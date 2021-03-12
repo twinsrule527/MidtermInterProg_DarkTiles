@@ -5,6 +5,8 @@ using UnityEngine.UI;
 //A script for all of the player's possible controls: Movement, pickup, drop, and use items.
 public class PlayerControl : Singleton<PlayerControl>
 {
+    [SerializeField]
+    private Vector3 StartPosition;
     private Stack<Item> Inventory;//The player's inventory is a stack of Items
     public Item InventoryPeek {//This allows any script that wants to to Peek at the top of the InventoryStack
         get {
@@ -57,11 +59,19 @@ public class PlayerControl : Singleton<PlayerControl>
     public PlayerState statePassTurn = new PlayerStatePassTurn();
     public PlayerState stateRefueling = new PlayerStateRefueling();
     public PlayerState stateNoAction = new PlayerStateNoAction();
+    public PlayerState stateEndGame = new PlayerStateEndGame();
 
     private PlayerState _currentState;//Whatever state the player is currently in - backup variable
     public PlayerState CurrentState {//For encapsulation, has a public property for its state - only can be gotten, will only be changed via ChangeState() script
         get {
             return _currentState;
+        }
+    }
+
+    private int _turns;//How many turns the game has lasted
+    public int Turns {
+        get {
+            return _turns;
         }
     }
     //Has a few UI elements that it keeps track of
@@ -70,11 +80,16 @@ public class PlayerControl : Singleton<PlayerControl>
     private Text playerPosText;
     void Start()
     {
+        //Starts in EndGame state to stop null responses
+        _currentState = stateEndGame;
+        //This is all moved to the STARTGAME() function, so that the game can be restarted
+        /*
         //Camera's position is set to your position + your offset:
         Camera.main.transform.position = transform.position + CameraOffset;
 
         Inventory = new Stack<Item>();
         Inventory.Push(GetComponentInChildren<NullItem>());
+        maxActions = ACTIONS_UNSTIMULATED;
         _actions = maxActions;
 
         //Player starts in TakeActionState
@@ -84,6 +99,7 @@ public class PlayerControl : Singleton<PlayerControl>
                             "Y: 0";
                             
         playerPosText.text = playerPos;
+        */
     }
 
     
@@ -266,6 +282,8 @@ public class PlayerControl : Singleton<PlayerControl>
         StartCoroutine(myActionBar.RefreshActionUI(maxActions, _actions, TIMEFORACTION));
         //Actions are refreshed at beginning of turn
         _actions = maxActions;
+        //Turn counter increases by 1
+        _turns++;
             
     }
 
@@ -291,5 +309,45 @@ public class PlayerControl : Singleton<PlayerControl>
                         "X: " + playerPos2Int.x.ToString() + "\n" +
                         "Y: " + playerPos2Int.y.ToString();
         playerPosText.text = myText;
+    }
+
+    //This function runs when you press the button to begin the game (everything in it is stuff that used to be in start, plus some refreshing of info)
+    public void StartGame() {
+        transform.position = StartPosition;
+        //Camera's position is set to your position + your offset:
+        Camera.main.transform.position = transform.position + CameraOffset;
+        
+        //Inventory is reset
+        Inventory = new Stack<Item>();
+        Inventory.Push(GetComponentInChildren<NullItem>());
+        maxActions = ACTIONS_UNSTIMULATED;
+        _actions = maxActions;
+        turnsStimulatedRemaining = 0;//Resets whether the player has super-long action turns
+        //Player starts in TakeActionState
+        ChangeState(stateTakeAction);
+        string playerPos = "Position: \n" +
+                            "X: 0 \n" +
+                            "Y: 0";
+                            
+        playerPosText.text = playerPos;
+        //Number of turns that have passed is reset
+        _turns = 0;
+        //Destroy all upkeep items, then reset the list
+        foreach(Item i in UpkeepItems) {
+            Destroy(i);
+        }
+        UpkeepItems = new List<Item>();
+        StartTurn();
+        //Game begins at the beginning of your turn
+        ChangeState(stateTakeAction);
+
+    }
+
+    //This function is called when the game ends, destroying everything in your inventory
+    public void EndGame() {
+        while(Inventory.Count > 1) {//Greater than 1 means it leaves the Null Item in
+            //Pops the item from the inventory and then destroys it
+            Destroy(Inventory.Pop());
+        }
     }
 }

@@ -5,9 +5,7 @@ using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 //A Manager that has various functions to be called regarding changes made to the Tilemap
 //Also manages the game's UI elements
-//TODO: Organize this script
 
-[System.Serializable]//TODO: Might remove this, if unneeded
 public struct TileTraits {//This Struct is a way to have attributes and functions attached to each Tile in the game
     public Vector2Int position;//The position of this given Tile - Used for reference - because of the Tile Dictionary, isn't completely needed
     public TileBase thisTile;//The Specific Tile from the Tile Palette that this Tile is
@@ -28,14 +26,17 @@ public class TileManager : Singleton<TileManager>
     private Lantern lanternPrefab;
     public static Lantern LANTERN;
     
-    //The Manager also gets all the UI elements that it might need to change
+    //The Manager also gets many UI elements that it might need to change
     [SerializeField]
     private Image TopInventory;//This is the object which displays the top item in your inventory
     [SerializeField]
     private Text LanternLevel;//The Text object that holds the light level of the lantern
     [SerializeField]
     private Image DarkField;//A dark aura used by the Lantern object
-    
+    public Text GameOverText;//The Text that appears when you lost the game, giving how many turns you survived
+    public Image Sidebar;//Player's sidebar, has to be disabled when the game ends
+    public GameObject StartGameButton;//A button that starts the game - is referenced here so that it can become invisible when the game begins/ends
+
     public readonly int NUMOFITEMS = 7;//How many different items there are
     public const int SCREENRADIUSTILES = 7;//How many away from the edge of the screen is the player in horizontal/vertical directions (including the player themself)
     
@@ -60,8 +61,9 @@ public class TileManager : Singleton<TileManager>
     private Tilemap myTilemap;
     private Dictionary<Vector2Int, bool> ExistingChunks = new Dictionary<Vector2Int, bool>();//This dictionary contains a list of all chunks which have been generated
     public Dictionary<Vector2Int, TileTraits> TileDictionary = new Dictionary<Vector2Int, TileTraits>();//This dictionary serves as a 2D array, but can go into negatives - and is full of existing tiles
-   
+    private List<Item> DeletableItems = new List<Item>();//List of all Items which are deleted when the game ends
     void Start() {
+        //This dropdown table only has to be introduced once
         for(int i = 0; i < FURTHESTCHUNKS; i++) {
             spawnProb tempProb;
             tempProb.darkTileProb = Mathf.Sqrt(2*(i+1));//Probability for a dark tile is a square root function
@@ -76,11 +78,13 @@ public class TileManager : Singleton<TileManager>
             //Finally, it is added to the list of chunk info
             SpawnChunks.Add(tempProb);
         }
+        /*REMOVED, and added to the StartGame function
         GenerateChunk(new Vector2Int(0, 0));
         //Instantiates the Lantern at (0, 0), which will change the light value of nearby objects
         LANTERN = Instantiate(lanternPrefab, new Vector3(0.5f, 0.5f, -1f), Quaternion.identity);
         LANTERN.LevelIndicator = LanternLevel;
         LANTERN.DarkAura = DarkField;
+        */
         //The action bar is also refreshed to your normal max actions
     }
     
@@ -169,6 +173,8 @@ public class TileManager : Singleton<TileManager>
         rnd = Random.Range(0f, SpawnChunks[chunkDist].totalItemSpawnProb);
         float temp = 0;
         //Cycles through item probabilities, to see if it has one
+        //Only does this if it is not a Large Spot of Darkness:
+        if(!tempTile.darkCause) {
         for(int i = 0; i < NUMOFITEMS; i ++) {
             temp += SpawnChunks[chunkDist].itemSpawnProb[i];
             //If this goes past the needed number, it either generates (or doesn't generate) the corresponding item
@@ -179,12 +185,12 @@ public class TileManager : Singleton<TileManager>
                 else {
                     Item tempItem = Instantiate(possibleItems[i], new Vector3(pos.x +0.5f, pos.y +0.5f, -1), Quaternion.identity);
                     tempTile.placedItem = tempItem;
-                    //Act as if the item was just dropped, in case it needs that - TODO?
-                    //tempItem.Drop();
+                    DeletableItems.Add(tempItem);
                 }
                 //Eitherway, this leads to breaking out of the for loop
                 break;
             }
+        }
         }
         TileDictionary.Add(pos, tempTile);
     }
@@ -403,6 +409,41 @@ public class TileManager : Singleton<TileManager>
         }
     }
 
+    //Function called when the StartGame button is pressed, which starts the game
+    public void StartGame() {
+        GenerateChunk(new Vector2Int(0, 0));
+        //Instantiates the Lantern at (0, 0), which will change the light value of nearby objects
+        LANTERN = Instantiate(lanternPrefab, new Vector3(0.5f, 0.5f, -1f), Quaternion.identity);
+        LANTERN.LevelIndicator = LanternLevel;
+        LANTERN.DarkAura = DarkField;
+        LANTERN.DarkAura.color = new Color(LANTERN.DarkAura.color.r, LANTERN.DarkAura.color.g, LANTERN.DarkAura.color.b, 0);//Starts completely see-through
+        //Enables the Inventory SideView:
+        Sidebar.gameObject.SetActive(true);
+        GameOverText.enabled = false;
+    }
+
+    //Called when the player loses, deleting everything as needed
+    public void EndGame() {
+        Sidebar.gameObject.SetActive(false);
+        GameOverText.enabled = true;
+        string gameOver = "GAME OVER \n" +
+                          PlayerControl.Instance.Turns.ToString() +
+                          " Turns Survived";
+        GameOverText.text = gameOver;
+        StartGameButton.SetActive(true);
+        //TODO: Destroy all existing objects and tiles
+        //Destroys all existing items
+        foreach(Item I in DeletableItems) {
+            if(I != null) {
+                Destroy(I);
+            }
+        }
+        DeletableItems = new List<Item>();
+        //Need to delete Chunks and Tiles
+        //Deletes chunks
+        ExistingChunks = new Dictionary<Vector2Int, bool>();
+        TileDictionary = new Dictionary<Vector2Int, TileTraits>();
+    }
 
 
 
