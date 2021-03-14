@@ -287,16 +287,16 @@ public class TileManager : Singleton<TileManager>
         //Next, if the player is holding a Candle or a Skull, it changes the darkmodifier of adjacent tiles
         TileTraits[] playerPosArray = GetAdjacency(new Vector2Int(Mathf.FloorToInt(playerPos.x), Mathf.FloorToInt(playerPos.y)));
         if(PlayerControl.Instance.InventoryPeek.Type == ItemType.Skull) {
-            //if holding a skull, increases adjacent tiles darkness by one
+            //if holding a skull, increases adjacent tiles darkness by 2
             for(int i = 1; i < playerPosArray.Length; i ++) {
-                playerPosArray[i].darkModifier++;
+                playerPosArray[i].darkModifier+=2;
                 TileDictionary[playerPosArray[i].position] = playerPosArray[i];
             }
         }
         else if(PlayerControl.Instance.InventoryPeek.Type == ItemType.Candle) {
-            //If holding a candle, decreases adjacent tile darkness by 1
+            //If holding a candle, decreases adjacent tile darkness by 2
             for(int i = 1; i < playerPosArray.Length; i ++) {
-                playerPosArray[i].darkModifier--;
+                playerPosArray[i].darkModifier-=2;
                 TileDictionary[playerPosArray[i].position] = playerPosArray[i];
             }
         }

@@ -5,6 +5,8 @@ using UnityEngine;
     //On use: Destroy all Briar bushes and Skulls on your Tile and in adjacent Tiles - Briars destroyed this way have a chance to drop a new positive item
 public class ItemAxe : Item
 {
+    [SerializeField]
+    private Vector2Int[] nearAdjacency;//A list of vector positions which are not quite adjacent to the player, which the Axe can still destroy objects at
     public override void Awake()
     {
         NameText = "HATCHET";
@@ -35,6 +37,25 @@ public class ItemAxe : Item
                 else if(tempItem.Type == ItemType.Skull) {
                     //First, calls the script for when the object is removed
                     tempItem.RemoveFromBoard(gottenTiles[i].position);
+                    Destroy(tempItem.gameObject);
+                }
+            }
+        }
+        //Then, does the same for the objects at corners
+        foreach(Vector2Int vec in nearAdjacency) {
+            TileTraits tempTraits = TileManager.Instance.TileDictionary[vec + gottenTiles[0].position];
+            Item tempItem = tempTraits.placedItem;
+            if(tempItem != null) {
+                //If it's a briar, you destroy the briar, which has a chance of revealing an item
+                if(tempItem.Type == ItemType.Briar) {
+                    //First, calls the script for when the object is removed
+                    tempItem.RemoveFromBoard(tempTraits.position);
+                    Destroy(tempItem.gameObject);
+                }
+                //If it's a skull, the skull is destroyed, and the Tile the skull is on needs to be rechecked
+                else if(tempItem.Type == ItemType.Skull) {
+                    //First, calls the script for when the object is removed
+                    tempItem.RemoveFromBoard(tempTraits.position);
                     Destroy(tempItem.gameObject);
                 }
             }
