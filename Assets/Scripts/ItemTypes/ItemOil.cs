@@ -7,6 +7,8 @@ public class ItemOil : Item
 {
     public override void Awake()
     {
+        NameText = "OIL CAN";
+        AbilityText = "While held, refuels your Lantern if it is walked over (but this is destroyed in the process). When used, brightens nearby spaces.";
         base.Awake();
         pickupable = true;
         Type = ItemType.Oil;

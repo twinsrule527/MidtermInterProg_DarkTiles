@@ -48,7 +48,7 @@ public class PlayerControl : Singleton<PlayerControl>
     public const int USEACTIONS = 2;
     public const int MOVEACTIONS = 1;
     public const float TIMEFORACTION = 0.5f;//How long any given action takes to perform - same for everything
-    private const int SLOW_DARK_LEVEL = 10;//The level of darkness a tile needs to be for it to be hard for you to stand on it
+    public const int SLOW_DARK_LEVEL = 10;//The level of darkness a tile needs to be for it to be hard for you to stand on it
 
     //A set of possible states the player can be in
     public PlayerState stateMoving = new PlayerStateMoving();

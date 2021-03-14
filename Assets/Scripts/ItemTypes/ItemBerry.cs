@@ -8,6 +8,8 @@ public class ItemBerry : Item
     private const int STIMULANT_TURNS = 10;//How many turns the Berry stimulates a player for
     public override void Awake()
     {
+        NameText = "BERRY";
+        AbilityText = "While held, gives you an extra move. When used, reinvigorates you, giving you more energy each turn.";
         base.Awake();
         pickupable = true;
         Type = ItemType.Berry;

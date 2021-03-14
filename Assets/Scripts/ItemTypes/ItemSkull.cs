@@ -13,6 +13,8 @@ public class ItemSkull : Item
     //TODO: Make all of them Start, rather than Awake?
     public void Start()
     {
+        NameText = "SKULL";
+        AbilityText = "An evil object, it spreads darkness while on the ground, being held, or being used. Be careful if you pick it up!";
         base.Awake();
         pickupable = true;
         Type = ItemType.Skull;

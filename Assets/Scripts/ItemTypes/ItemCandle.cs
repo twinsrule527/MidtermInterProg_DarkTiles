@@ -88,6 +88,8 @@ public class ItemCandle : Item
 
     //This is a pickupable Item
     public override void Awake() {
+        NameText = "CANDLE";
+        AbilityText = "While held, brightens nearby spaces. When used, it is placed on the ground to provide extra light for several turns.";
         base.Awake();
         pickupable = true;
         Type = ItemType.Candle;

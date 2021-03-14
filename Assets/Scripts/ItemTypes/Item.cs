@@ -39,6 +39,9 @@ public class Item : MonoBehaviour
             return myAura;
         }
     }
+    //Has 2 strings: its name, and its abilities for when its called in the HighlightInfo
+    public string NameText;//The name of the object
+    public string AbilityText;//The object's abilities
     public virtual void Awake() {
         mySpriteRenderer = GetComponent<SpriteRenderer>();
     }

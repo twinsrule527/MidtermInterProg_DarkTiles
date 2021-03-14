@@ -14,6 +14,8 @@ public class ItemBriar : Item
     private float totalProbSpawn;//The total of the probabilities in the list above
     public override void Awake()
     {
+        NameText = "BRIAR BUSH";
+        AbilityText = "Thorny bushes that are hard to move through. If destroyed, might drop another item where it was.";
         base.Awake();
         pickupable = false;
         Type = ItemType.Briar;

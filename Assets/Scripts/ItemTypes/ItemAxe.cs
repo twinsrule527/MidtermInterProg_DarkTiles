@@ -7,6 +7,8 @@ public class ItemAxe : Item
 {
     public override void Awake()
     {
+        NameText = "HATCHET";
+        AbilityText = "While held, increases speed through briar bushes. Can be used to destroy briar bushes and skulls.";
         base.Awake();
         pickupable = true;
         Type = ItemType.Axe;

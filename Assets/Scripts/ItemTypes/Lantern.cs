@@ -20,6 +20,8 @@ public class Lantern : Item
     //On start, will lower the darkness value of nearby Tiles
     void Start() {
         base.Awake();
+        NameText = "LANTERN";
+        AbilityText = "Your home base. The more fuel it has, the slower the darkness spreads. Don't let it run out!";
         Fuel = START_FUEL;
         pickupable = false;
         Type = ItemType.Lantern;
