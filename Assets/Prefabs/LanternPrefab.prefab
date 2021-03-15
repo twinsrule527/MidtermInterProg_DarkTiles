@@ -71,7 +71,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: d0603ffd6ec06c14db33488a54bf7f23, type: 3}
+  m_Sprite: {fileID: 5127068253903288727, guid: ed632482184c6694b9cae303358885fc,
+    type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -95,7 +96,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   myAura: {fileID: 9106086165918717055}
+  NameText: 
+  AbilityText: 
   pickupable: 0
   Fuel: 0
   LevelIndicator: {fileID: 0}
   DarkAura: {fileID: 0}
+  MySprite:
+  - {fileID: 5127068253903288727, guid: ed632482184c6694b9cae303358885fc, type: 3}
+  - {fileID: 2481981271905706200, guid: ed632482184c6694b9cae303358885fc, type: 3}
+  - {fileID: 4132635639933757553, guid: ed632482184c6694b9cae303358885fc, type: 3}
+  - {fileID: 6101768060378248711, guid: ed632482184c6694b9cae303358885fc, type: 3}
+  - {fileID: -3971935430536681843, guid: ed632482184c6694b9cae303358885fc, type: 3}
+  - {fileID: 2874024345123785452, guid: ed632482184c6694b9cae303358885fc, type: 3}
+  - {fileID: 2345517408209877325, guid: ed632482184c6694b9cae303358885fc, type: 3}
+  - {fileID: -2817042332280854420, guid: ed632482184c6694b9cae303358885fc, type: 3}
+  - {fileID: 4388972013546765475, guid: ed632482184c6694b9cae303358885fc, type: 3}

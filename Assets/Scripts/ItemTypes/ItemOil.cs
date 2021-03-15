@@ -32,4 +32,12 @@ public class ItemOil : Item
 
         }
     }
+
+    //A Coroutine for when you refuel your lantern with this Oil can, so that it is destroyed after a moment of time
+    public IEnumerator Refueled() {
+        //It starts an Aura growth
+        StartCoroutine(ChangeAura(PlayerControl.Instance.transform.position, 0f, 2f, PlayerControl.TIMEFORACTION, false));
+        yield return new WaitForSeconds(PlayerControl.TIMEFORACTION);
+        Destroy(gameObject);
+    }
 }

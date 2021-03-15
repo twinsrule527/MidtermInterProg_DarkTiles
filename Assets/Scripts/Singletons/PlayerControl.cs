@@ -292,7 +292,9 @@ public class PlayerControl : Singleton<PlayerControl>
     public void Refuel( out bool fueled) {
         //If the top of the Inventory is Oil, it refuels
         if(Inventory.Peek().Type == ItemType.Oil) {
-            Inventory.Pop();
+            Item tempItem = Inventory.Pop();
+            ItemOil tempOil = tempItem.GetComponent<ItemOil>();
+            tempOil.StartCoroutine(tempOil.Refueled());
             TileManager.LANTERN.Fuel += Lantern.FUEL_PER_OIL;
             fueled = true;
         }

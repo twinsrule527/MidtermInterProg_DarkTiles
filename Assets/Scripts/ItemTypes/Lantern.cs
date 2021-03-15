@@ -17,7 +17,11 @@ public class Lantern : Item
     public Image DarkAura;//This image is a darkness which covers the entire screen, becoming more visible with a lower Lantern Level
     private const int BASE_FUEL = 15;//Base fuel is used for when the DarkAura appears
     private const float MAX_AURA_ALPHA = 0.3f;//How dark the Lantern's aura can get
+    
+    [SerializeField]
+    private Sprite[] MySprite;//Has an array of possible sprites, for different Lantern Light Levels
     //On start, will lower the darkness value of nearby Tiles
+    
     void Start() {
         base.Awake();
         NameText = "LANTERN";
@@ -82,9 +86,14 @@ public class Lantern : Item
         if(Fuel < BASE_FUEL) {
             float alpha = Mathf.Lerp(0, MAX_AURA_ALPHA, BASE_FUEL - Fuel);
             DarkAura.color = new Color(DarkAura.color.r, DarkAura.color.g, DarkAura.color.b, alpha);
+            //Sprite is set proportionally to the amount of light you have
+            int levelProportion = Mathf.CeilToInt(Fuel / ((float)BASE_FUEL / (float)MySprite.Length));
+            Debug.Log(levelProportion);
+            mySpriteRenderer.sprite = MySprite[MySprite.Length - (levelProportion)];
         }
         else {
             DarkAura.color = new Color(DarkAura.color.r, DarkAura.color.g, DarkAura.color.b, 0);
+            mySpriteRenderer.sprite = MySprite[0];
         }
         RefreshLevel();
         if(Fuel <= 0.5f) {
