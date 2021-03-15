@@ -60,8 +60,12 @@ public class ItemAxe : Item
                 }
             }
         }
-        //And the axe is destroyed
-        Destroy(gameObject);
+            //And, its aura grows
+            StartCoroutine(ChangeAura(PlayerControl.Instance.transform.position, 0, 3, PlayerControl.TIMEFORACTION, false));
+        }
+        else if(perTime == 1) {
+            //And the axe is destroyed at the end of the Use acton
+            Destroy(gameObject);
         }
     }
 }

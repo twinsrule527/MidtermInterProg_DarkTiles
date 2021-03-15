@@ -35,6 +35,5 @@ public class PlayerStateUse : PlayerState
         base.Enter();
         curTime = 0;
         UsedItem = PlayerControl.Instance.UsedItem;
-        Debug.Log(UsedItem);
     }
 }
