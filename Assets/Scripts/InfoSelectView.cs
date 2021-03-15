@@ -38,14 +38,23 @@ public class InfoSelectView : MonoBehaviour
                 }
                 //Otherwise, it shows the Tile's traits
                 else {
-                    newText = "TILE \n" +
+                    //Shows something different depending on whether it has a darkmodifier
+                    if(SpotCheck.darkModifier == 0) {
+                        newText = "TILE \n" +
                               "X: " + SpotCheck.position.x.ToString() + "\n" +
                               "Y: " + SpotCheck.position.y.ToString() + "\n" +
                               "Darkness: " + Mathf.FloorToInt(SpotCheck.darkLevel).ToString() + "/15";
-                    if(SpotCheck.darkLevel >= TileManager.MAXDARKLEVEL) {
+                    }
+                    else {
+                        newText = "TILE \n" +
+                              "X: " + SpotCheck.position.x.ToString() + "\n" +
+                              "Y: " + SpotCheck.position.y.ToString() + "\n" +
+                              "Darkness: (" + Mathf.FloorToInt(SpotCheck.darkLevel).ToString() + "+" + SpotCheck.darkModifier.ToString() +")/15";
+                    }
+                    if(SpotCheck.darkLevel + SpotCheck.darkModifier >= TileManager.MAXDARKLEVEL) {
                         newText = newText + "\nCan't be walked over!";
                     }
-                    else if(SpotCheck.darkLevel >= PlayerControl.SLOW_DARK_LEVEL) {
+                    else if(SpotCheck.darkLevel + SpotCheck.darkModifier >= PlayerControl.SLOW_DARK_LEVEL) {
                         newText = newText + "\nHard to walk over!";
                     }
                 }

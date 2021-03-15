@@ -6973,8 +6973,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 382.965, y: -5.0299683}
-  m_SizeDelta: {x: 721.6366, y: 50.358917}
+  m_AnchoredPosition: {x: 396.7, y: -5.0299683}
+  m_SizeDelta: {x: 749.15466, y: 50.358917}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &404841369
 MonoBehaviour:
@@ -8308,8 +8308,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 226.1, y: -27.599998}
-  m_SizeDelta: {x: 407.83545, y: 95.59149}
+  m_AnchoredPosition: {x: 229.4, y: -27.599998}
+  m_SizeDelta: {x: 414.38733, y: 95.59149}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1075636672
 MonoBehaviour:
@@ -8343,13 +8343,12 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1.25
-  m_Text: 'While being held: Increases darkness of nearby Tiles.
+  m_Text: 'While being held: Increases darkness of near Tiles.
 
-    When Used:
-    Increases darkness of nearby Tiles.
+    When Used: Increases
+    darkness of near spots.
 
-    While on the ground, increases darkness
-    of its Tile.'
+    While on the ground, increases darkness of its Tile.'
 --- !u!222 &1075636673
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -8933,8 +8932,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 164.6, y: -4.9937}
-  m_SizeDelta: {x: 276.3781, y: 50.371582}
+  m_AnchoredPosition: {x: 164.6, y: -14.2}
+  m_SizeDelta: {x: 276.3781, y: 68.71689}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1393014469
 MonoBehaviour:
@@ -8994,7 +8993,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1463193155
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9011,8 +9010,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 118.7, y: -23.8}
-  m_SizeDelta: {x: 137.46999, y: 75.55002}
+  m_AnchoredPosition: {x: 122.4, y: -29.7}
+  m_SizeDelta: {x: 155.27647, y: 89.96422}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1463193156
 MonoBehaviour:
@@ -9035,7 +9034,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: be209fb76aa619c46996a6644be60dab, type: 3}
-    m_FontSize: 24
+    m_FontSize: 22
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 1
@@ -9887,8 +9886,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 382.965, y: -5.0299683}
-  m_SizeDelta: {x: 721.6366, y: 50.358917}
+  m_AnchoredPosition: {x: 395.4, y: -5.0299683}
+  m_SizeDelta: {x: 746.5338, y: 50.358917}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1747630530
 MonoBehaviour:
